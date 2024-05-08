@@ -1,38 +1,110 @@
-.App {
-  text-align: center;
+tr {
+  color: #ffffff;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+h4 {
+  margin-bottom: 0 !important;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+h3 {
+  color: #ce66d2 !important;
+  margin-top: .5rem !important;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+p {
+  color: #ce66d2 !important;
 }
 
-.App-link {
-  color: #61dafb;
+.interlocutorVideoBox {
+  width: 90% !important;
+  max-width: 662px !important;
+  border-radius: 15px;
+  box-shadow:
+    0.3em 0.3em 1em rgb(185 37 190 / 50%);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.img-fluid {
+  border-radius: 15px !important;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.rowItem:hover {
+  color: #ce66d2;
+  background-color: #ffffff;
+}
+
+.navbar {
+  background: linear-gradient(to right, #c751cb, #f8e9f9);
+  border-radius: 15px;
+  box-shadow:
+    0.3em 0.3em 1em rgb(185 37 190 / 50%);
+}
+
+.navbar-brand {
+  color: #ffffff !important;
+}
+
+.panel {
+  background: linear-gradient(to right, #ce66d2, #f1d3f2);
+  border-radius: 15px;
+  box-shadow:
+    0.3em 0.3em 1em rgb(185 37 190 / 50%);
+}
+
+table {
+  --bs-table-bg: unset !important;
+}
+
+.table>:not(caption)>*>* {
+  color: unset !important;
+}
+
+.card {
+  background: transparent;
+  border-style: solid;
+  --bs-card-border-color: rgb(255 255 255) !important;
+  border: 0 !important;
+  border-radius: 15px !important;
+  overflow: clip;
+  color: #ffffff !important;
+  box-shadow:
+    0.3em 0.3em 1em rgb(185 37 190 / 50%);
+}
+
+.card-header {
+  background: #e3a8e5 !important;
+}
+
+.btn-primary, 
+.btn-primary:hover {
+  border-radius: 15px !important;
+  background-color: #ce66d2 !important;
+  border-color: #ce66d2 !important;
+}
+
+.form-label {
+  color: #ce66d2;
+  margin-top: .5rem;
+}
+
+.form-control {
+  color: #ce66d2 !important;
+  border: var(--bs-border-width) solid #f1d3f2 !important;
+}
+
+#taskCountInput {
+  width: 25%;
+  margin-bottom: .5rem;
+}
+
+#doneAssignmentConfigButton,
+#theyGotItButton {
+  width: 25%;
+}
+
+#scores-table {
+  width: 75% !important;
 }
