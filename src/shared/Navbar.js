@@ -8,6 +8,7 @@ function Navbar({ setCurrentPage }) {
                 <ul className="navbar-nav me-3">
                 <NavItem setCurrentPage={setCurrentPage} navItemText="Students" pageLink={pages.Collab} />
                 <NavItem setCurrentPage={setCurrentPage} navItemText="Teachers" pageLink={pages.TMC} />
+                <LogoutButton setCurrentPage={setCurrentPage} />
                 </ul>        
             </div>
         </nav>
@@ -24,6 +25,17 @@ function NavItem({ setCurrentPage, navItemText, pageLink }) {
         <li className="nav-item">
             <button type="button" className="btn btn-md btn-block btn-primary mx-1" onClick={updateCurrentPage}>{navItemText}</button>
         </li>
+    );
+}
+
+function LogoutButton({ setCurrentPage }) {
+    function updateCurrentPage() {
+        localStorage.setItem("currentPage", pages.Default);
+        setCurrentPage(pages.Default);
+    };
+
+    return (
+        <button className="bi bi-box-arrow-right my-auto" onClick={updateCurrentPage}></button>
     );
 }
 

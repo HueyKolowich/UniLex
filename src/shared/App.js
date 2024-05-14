@@ -2,11 +2,13 @@ import { useState } from "react";
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 import pages from "./Pages";
 import Navbar from "./Navbar";
-import TMCBody from "./TMC";
-import CollabBody from "./Collab";
+import LoginBody from "./Login";
+import TMCBody from "../teacher/TMC";
+import CollabBody from "../student/Collab";
 
 function App() {
   const [currentPage, setCurrentPage] = useState(discoverCurrentPage());  
@@ -20,10 +22,10 @@ function App() {
       bodyContent = <CollabBody />;
       break;
     case pages.default:
-      bodyContent = <p>Login Page</p>;
+      bodyContent = <LoginBody setCurrentPage={setCurrentPage} />;
       break;
     default:
-      bodyContent = <p>Login Page</p>;
+      bodyContent = <LoginBody setCurrentPage={setCurrentPage} />;
   }
 
   return (

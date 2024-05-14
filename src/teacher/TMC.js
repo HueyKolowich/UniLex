@@ -7,7 +7,8 @@ function TMCBody() {
 
     return (
         <div>
-            { isConfiguringAssignment ? <AssignmentConfigurationBody setIsConfiguringAssignment={setIsConfiguringAssignment}/> :
+            { 
+                isConfiguringAssignment ? <AssignmentConfigurationBody setIsConfiguringAssignment={setIsConfiguringAssignment}/> :
                 <div className="container-fluid">
                     <div className="row my-3">
                     <div className="col mx-3">

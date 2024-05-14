@@ -1,6 +1,12 @@
 import { useState } from 'react';
 
-const placeholderImage = require('./Placeholder.png');
+const placeholderImage1 = require('./Placeholder.png');
+const placeholderImage2 = require('./Placeholder2.png');
+
+const statuses = {
+    waiting: "waiting",
+    ready: "ready"
+}
 
 const turns = {
     this: "this",
@@ -8,36 +14,79 @@ const turns = {
 }
 
 function CollabBody() {
+    const [status, setStatus] = useState(statuses.waiting);
+
     return (
         <div className="container-fluid">
-            <div className="row my-3">
-                <div className="col">
-                    <InterlocutorVideoBox />
+            { (status === statuses.ready) ?
+                <div>
+                    <div className="row my-3">
+                        <div className="col">
+                            <InterlocutorVideoBox initialStatus={statuses.ready} placeholderImage={placeholderImage1} />
+                        </div>
+                        <div className="col me-4">
+                            <ActivityBody />
+                        </div>
+                    </div>
+                    <div className="row my-5">
+                        <div className="col mx-4 d-flex justify-content-center">
+                            <Table />
+                        </div>
+                    </div>
+                </div> :
+                <div>
+                    <div className="row my-3 mx-3 d-flex justify-content-between">
+                        <InterlocutorVideoBox initialStatus={statuses.waiting} placeholderImage={placeholderImage1} />
+                        <InterlocutorVideoBox initialStatus={statuses.ready} placeholderImage={placeholderImage2} />
+                    </div>
+                    <div className="row mt-5">
+                        <StartCollabButton setStatus={setStatus} />
+                    </div>
                 </div>
-                <div className="col me-4">
-                    <ActivityBody />                    
-                </div>
-            </div>
-            <div className="row my-5">
-                <div className="col mx-4 d-flex justify-content-center">
-                    <Table />
-                </div>                
-            </div>            
+            }
         </div>
     );
 }
 
-function InterlocutorVideoBox() {
+function InterlocutorVideoBox({ initialStatus, placeholderImage}) { 
+    const [imageStatus, setImageStatus] = useState(initialStatus);
+
+    console.log(initialStatus);
+
+    if (initialStatus === statuses.waiting) {
+        setTimeout(() => {
+            setImageStatus(statuses.ready);
+        }, "10000");
+    }
+    
     return (
-        <div className="interlocutorVideoBox mx-auto">
-            <TemporaryImagePlaceholder />
+        <div className="card d-flex justify-content-center align-items-center" id="interlocutorVideoBox">
+            { (imageStatus === statuses.ready) ? <TemporaryImagePlaceholder placeholderImage={placeholderImage} /> :                
+                <LoadingPlaceholder />
+            }
         </div>
     );
 }
 
-function TemporaryImagePlaceholder() {
+function TemporaryImagePlaceholder({ placeholderImage}) {
     return (
-        <img src={placeholderImage} className="img-fluid p-4" alt="Placeholder for testing" />
+        <img src={placeholderImage} className="img-fluid py-2" alt="Placeholder for testing" />        
+    );
+}
+
+function LoadingPlaceholder() {
+    return (
+        <div className="spinner-border" role="status" />
+    );
+}
+
+function StartCollabButton({ setStatus }) {
+    function startCollab() {
+        setStatus(statuses.ready);
+    }
+
+    return (
+        <button type="button" className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="StartCollabButton" onClick={startCollab}>Ready!</button>
     );
 }
 
