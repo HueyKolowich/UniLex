@@ -51,8 +51,6 @@ function CollabBody() {
 function InterlocutorVideoBox({ initialStatus, placeholderImage}) { 
     const [imageStatus, setImageStatus] = useState(initialStatus);
 
-    console.log(initialStatus);
-
     if (initialStatus === statuses.waiting) {
         setTimeout(() => {
             setImageStatus(statuses.ready);
