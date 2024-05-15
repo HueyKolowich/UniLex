@@ -83,7 +83,7 @@ table {
   border: var(--bs-border-width) solid #f1d3f2 !important;
 }
 .form-control:focus {
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
 .loginpagebody {
