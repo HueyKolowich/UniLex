@@ -3,18 +3,12 @@ import CollabSession from './CollabSession.js';
 import { getVideoToken, VideoSDKMeetingProvider } from './Video.js';
 import webSocketMessageTypes from '../shared/WebSocketMessageTypes.js';
 
-const statuses = {
-    waiting: "waiting",
-    ready: "ready"
-};
-
 const turns = {
     this: "this",
     other: "other"
 };
 
 function CollabBody() {
-    const [status, setStatus] = useState(statuses.waiting);
     const [collabSession, setCollabSession] = useState(null);
     const [meetingId, setMeetingId] = useState(null);
     const [videoToken, setVideoToken] = useState(null);
@@ -49,17 +43,10 @@ function CollabBody() {
     return (
         <div className="container-fluid">
             {meetingId ? (
-                status === statuses.ready ? (
-                    <div>
-                        <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} />
-                        <ActivityBody />
-                    </div>
-                ) : (
-                    <div>
-                        <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} />
-                        <StartCollabButton setStatus={setStatus} />
-                    </div>
-                )
+                <div>
+                    <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} />
+                    <ActivityBody />
+                </div>
             ) : (
                 <div className="d-flex justify-content-center align-items-center">
                     <div className="spinner-border" role="status" />
@@ -69,17 +56,6 @@ function CollabBody() {
     );
 }
 
-function StartCollabButton({ setStatus }) {
-    function startCollab() {
-        setStatus(statuses.ready);
-    }
-
-    return (
-        <button type="button" className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="StartCollabButton" onClick={startCollab}>
-        Ready!
-        </button>
-    );
-}
 
 function ActivityBody() {
     const [turn, setTurn] = useState(turns.other);
