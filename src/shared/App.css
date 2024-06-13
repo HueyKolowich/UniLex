@@ -125,7 +125,8 @@ table {
 
 #doneAssignmentConfigButton,
 #theyGotItButton,
-#StartCollabButton {
+#StartCollabButton,
+#JoinMeetingButton {
   width: 25%;
 }
 
@@ -133,9 +134,9 @@ table {
   width: 75% !important;
 }
 
-#interlocutorVideoBox {
-  width: 800px !important;
-  height: 618px !important;
+.interlocutorVideoBox {
+  width: 100% !important;
+  /* height: 618px !important; */
   border-radius: 15px;
   box-shadow:
     0.3em 0.3em 1em rgb(185 37 190 / 50%);

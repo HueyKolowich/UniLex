@@ -1,11 +1,13 @@
+require('dotenv').config()
+
 const express = require('express');
 const jwt = require('jsonwebtoken');
-require('dotenv').config()
+const { webSocketHandler } = require('./WebSocketHandler.js');
 
 const app = express();
 const port = 3000;
 
-app.use(express.static('./build'));
+app.use(express.static('../build')); //!IMPORTANT When pushed to dist folder this must be changed to './build'
 
 app.get('/generate-video-token', (req, res) => {
   const options = { 
@@ -23,6 +25,8 @@ app.get('/generate-video-token', (req, res) => {
   res.json({ videoToken });
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
+
+webSocketHandler(server);
