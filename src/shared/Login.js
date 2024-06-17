@@ -47,17 +47,4 @@ function LoginBody({ setCurrentPage }) {
     );
 }
 
-function LoginButton({ setCurrentPage }) {
-    function updateCurrentPage() {
-        localStorage.setItem("currentPage", pages.TMC);
-        setCurrentPage(pages.TMC);
-    };
-
-    return (
-        <button type="submit" id="login" onClick={updateCurrentPage} className="btn btn-lg btn-block btn-primary mx-auto">
-            Login
-        </button>
-    );
-}
-
 export default LoginBody;
