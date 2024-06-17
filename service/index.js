@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const DB = require('./Database.js');
 const { webSocketHandler } = require('./WebSocketHandler.js');
@@ -10,6 +11,7 @@ const app = express();
 const port = 3000;
 
 const authCookieName = 'token';
+const roleCookieName = 'role';
 
 app.use(express.json());
 
@@ -40,11 +42,15 @@ app.post('/login', async (req, res) => {
         maxAge: 18000000,
         secure: true
       })
-      res.send({ id: user._id, role: user.role });
+      res.cookie(roleCookieName, user.role, {
+        httpOnly: true,
+        secure: true
+      })
+      res.status(200).send({ msg: "Success", role: user.role });
       return;
     }
   }
-  res.status(401).send({ msg: 'Unauthorized' });
+  res.status(401).send({ msg: "Unauthorized" });
 });
 
 app.use(async (req, res, next) => {

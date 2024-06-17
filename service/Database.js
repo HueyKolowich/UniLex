@@ -9,7 +9,7 @@ const db = client.db('unite_db');
 const userCollection = db.collection('user');
 
 function getUser(name) {
-    return userCollection.findOne({ name: name });
+  return userCollection.findOne({ name: name });
 }
 
 function getUserByToken(token) {
@@ -17,20 +17,14 @@ function getUserByToken(token) {
 }
 
 async function generateNewSessionAuthToken(name) {
-    const newToken = uuid.v4();
+  const newToken = uuid.v4();
 
-    userCollection.runCommand(
-        {
-            update: "users",
-            updates: [
-                {
-                    q: { name: name }, u: { $set: { token: newToken} }
-                }
-            ]
-        }
-    );
+  await userCollection.updateOne(
+    { name: name },
+    { $set: { token: newToken } }
+  );
 
-    return newToken;
+  return newToken;
 }
 
 async function createUser(name, password, role) {
