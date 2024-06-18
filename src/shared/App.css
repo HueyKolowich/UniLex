@@ -111,8 +111,8 @@ table {
 }
 
 #uniteLogo {
-  width: 450px !important;
-  height: 450px !important;
+  width: 300px !important;
+  height: 300px !important;
   border-radius: 50%;
   box-shadow:
     0.3em 0.3em 1em rgb(185 37 190 / 50%);
