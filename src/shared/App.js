@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -11,21 +10,29 @@ import TMCBody from "../teacher/TMC";
 import CollabBody from "../student/Collab";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState(discoverCurrentPage());  
-  
+  const [userRole, setUserRole] = useState("");
+  const [currentPage, setCurrentPage] = useState(discoverCurrentPage());
+
   let bodyContent;
   switch (currentPage) {
     case pages.TMC:
-      bodyContent = <TMCBody />;
+      if (preventAccessOutsideOfRole(userRole, currentPage)) {
+        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
+      } else {
+        bodyContent = <TMCBody />;
+      }
       break;
     case pages.Collab:
-      bodyContent = <CollabBody />;
+      if (preventAccessOutsideOfRole(userRole, currentPage)) {
+        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
+      } else {
+        bodyContent = <CollabBody />;
+      }
       break;
-    case pages.default:
-      bodyContent = <LoginBody setCurrentPage={setCurrentPage} />;
-      break;
+    case pages.Default:
     default:
-      bodyContent = <LoginBody setCurrentPage={setCurrentPage} />;
+      bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
+      break;
   }
 
   return (
@@ -37,7 +44,33 @@ function App() {
 }
 
 function discoverCurrentPage() {
-  return localStorage.getItem("currentPage");
+  return localStorage.getItem("currentPage") || pages.Default;
+}
+
+/**
+ * Prevents users lacking the correct role from accessing modules
+ * 
+ * @param {*} userRole 
+ * @param {*} currentPage 
+ * @returns true if access needs to be denied, false otherwise
+ */
+function preventAccessOutsideOfRole(userRole, currentPage) {
+  if (userRole) {
+    if ((userRole.includes("student")) && (currentPage === pages.TMC)) {
+      localStorage.setItem("currentPage", pages.Default);
+      return true;
+    }
+
+    if ((userRole.includes("teacher")) && (currentPage === pages.Collab)) {
+      localStorage.setItem("currentPage", pages.Default);
+      return true;
+    }
+
+    return false
+  } else {
+    localStorage.setItem("currentPage", pages.Default);
+    return true;
+  }
 }
 
 export default App;

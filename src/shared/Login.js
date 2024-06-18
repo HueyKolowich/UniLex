@@ -3,7 +3,7 @@ import pages from "./Pages";
 
 const uniteLogo = require("./unite-high-resolution-logo-transparent.png");
 
-function LoginBody({ setCurrentPage }) {
+function LoginBody({ setCurrentPage, setUserRole }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
@@ -20,8 +20,10 @@ function LoginBody({ setCurrentPage }) {
 
         if (authenticationResult.msg.includes("Success")) {
             if (authenticationResult.role.includes("student")) {
+                setUserRole("student");
                 setCurrentPage(pages.Collab);
             } else {
+                setUserRole("teacher");
                 setCurrentPage(pages.TMC);
             }
         }
