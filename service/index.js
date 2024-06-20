@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({path: __dirname +'/.env'})
 
 const express = require('express');
 const cookieParser = require('cookie-parser');
@@ -21,14 +21,14 @@ app.use(express.static('../build')); //!IMPORTANT When pushed to dist folder thi
 
 app.post('/create', async (req, res) => {
   if (await DB.getUser(req.body.name)) {
-      res.status(409).send({ msg: 'Existing user' });
-    } else {
-      const user = await DB.createUser(req.body.name, req.body.password, req.body.role);
-  
-      res.send({
-        id: user._id,
-      });
-    }
+    res.status(409).send({ msg: 'Existing user' });
+  } else {
+    const user = await DB.createUser(req.body.name, req.body.password, req.body.role);
+
+    res.send({
+      id: user._id,
+    });
+  }
 });
 
 app.post('/login', async (req, res) => {
@@ -65,13 +65,13 @@ app.use(async (req, res, next) => {
 
 app.get('/generate-video-token', (req, res) => {
   const options = { 
-      expiresIn: '120m', 
-      algorithm: 'HS256' 
+    expiresIn: '120m', 
+    algorithm: 'HS256' 
   };
 
   const payload = {
-      apikey: process.env.VIDEOSDK_API_KEY,
-      permissions: ['allow_join']
+    apikey: process.env.VIDEOSDK_API_KEY,
+    permissions: ['allow_join']
   };
 
   const videoToken = jwt.sign(payload, process.env.VIDEOSDK_SECRET_KEY, options);
