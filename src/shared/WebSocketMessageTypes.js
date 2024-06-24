@@ -1,5 +1,6 @@
 const webSocketMessageTypes = {
-    MeetingId: "MeetingId"
+    MeetingId: "MeetingId",
+    GetPrompt: "GetPrompt"
 }
 
 export default webSocketMessageTypes;

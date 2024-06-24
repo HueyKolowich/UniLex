@@ -1,8 +1,8 @@
-
 const { WebSocketServer } = require('ws');
 const uuid = require('uuid');
 const url = require('url');
 const fetch = require('node-fetch');
+const DB = require('./Database.js');
 
 const groups = new Map();
 
@@ -30,13 +30,42 @@ function webSocketHandler(server) {
 
         logGroups();
 
-        ws.on('message', function message(data) {
+        ws.on('message', async function message(data) {
+            const dataAsJSON = JSON.parse(data.toString());
+            const webSocketRequestType = dataAsJSON.WebSocketRequestType;
+
             const groupKey = findGroupForConnection(connection);
             if (groupKey) {
                 const group = groups.get(groupKey);
-                group.forEach((c) => {
-                    c.ws.send(groupKey);
-                });
+
+                switch (webSocketRequestType) {
+                    case "MeetingId":
+                        group.forEach((c) => {
+                            c.ws.send(JSON.stringify({"type" : "MeetingId", "data" : groupKey}));
+                        });
+                        break;
+                    case "GetPrompt":
+                        const newPromptPosition = dataAsJSON.currentPromptPosition + 1;
+
+                        try {
+                            const newPrompt = await DB.getPrompt(newPromptPosition);
+                            if (newPrompt) {
+                                group.forEach((c) => {
+                                    c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPromptPosition": newPromptPosition, "newPrompt": newPrompt }));
+                                });
+                            } else {
+                                group.forEach((c) => {
+                                    c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPromptPosition": newPromptPosition, "newPrompt": "Finished/Terminado" }));
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error getting prompt:', error);
+                            group.forEach((c) => {
+                                c.ws.send(JSON.stringify({ "type": "GetPrompt", "error": "Error retrieving prompt" }));
+                            });
+                        }
+                        break;
+                }
             }
         });
 

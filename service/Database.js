@@ -7,6 +7,7 @@ const url = `mongodb+srv://${config.userName}:${config.password}@${config.hostna
 const client = new MongoClient(url);
 const db = client.db('unite_db');
 const userCollection = db.collection('user');
+const promptsCollection = db.collection('prompts');
 
 function getUser(name) {
   return userCollection.findOne({ name: name });
@@ -41,9 +42,23 @@ async function createUser(name, password, role) {
   return user;
 }
 
+async function getPrompt(position) {
+  const result = await promptsCollection.findOne(
+    { classRoomId: "1" },
+    { projection: { promptsList: { $slice: [position, 1] } } }
+  );
+  if (result && result.promptsList.length > 0) {
+    return result.promptsList[0];
+  } else {
+    return "";
+  }
+}
+
+
 module.exports = {
   getUser,
   getUserByToken,
   createUser,
-  generateNewSessionAuthToken
+  generateNewSessionAuthToken,
+  getPrompt
 };
