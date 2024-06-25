@@ -17,6 +17,12 @@ function getUserByToken(token) {
   return userCollection.findOne({ token: token });
 }
 
+async function getClassRoomIdByToken(token) {
+  const result = await userCollection.findOne({ token: token});
+  
+  return result.classRoomId;
+}
+
 async function generateNewSessionAuthToken(name) {
   const newToken = uuid.v4();
 
@@ -42,6 +48,18 @@ async function createUser(name, password, role) {
   return user;
 }
 
+async function addPrompts(classRoomId, promptsList) {
+  const filter = { classRoomId: classRoomId };
+  const options = { upsert: true };
+  const updateDoc = {
+    $set: {
+      promptsList: promptsList
+    }
+  };
+  
+  await promptsCollection.updateOne(filter, updateDoc, options);
+}
+
 async function getPrompt(position) {
   const result = await promptsCollection.findOne(
     { classRoomId: "1" },
@@ -58,7 +76,9 @@ async function getPrompt(position) {
 module.exports = {
   getUser,
   getUserByToken,
+  getClassRoomIdByToken,
   createUser,
   generateNewSessionAuthToken,
+  addPrompts,
   getPrompt
 };

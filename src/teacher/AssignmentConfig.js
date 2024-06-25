@@ -1,23 +1,23 @@
 import { useState } from "react";
 
 function AssignmentConfigurationBody({ setIsConfiguringAssignment }) {
-    const [translationTaskCount, setTranslationTaskCount] = useState(1);
+    const [promptTaskCount, setPromptTaskCount] = useState(1);
 
     return (
         <div className="container-fluid">
             <form className="row g-3"> 
-                <TranslationTaskCountSelector setTranslationTaskCount={setTranslationTaskCount} />
-                <TranslationTaskFields numTranslationTasks={translationTaskCount} />
+                <PromptTaskCountSelector setPromptTaskCount={setPromptTaskCount} />
+                <PromptTaskFields numPromptTasks={promptTaskCount} />
                 <FinishedButton setIsConfiguringAssignment={setIsConfiguringAssignment} />
             </form>            
         </div>
     );
 }
 
-function TranslationTaskCountSelector({ setTranslationTaskCount }) {
+function PromptTaskCountSelector({ setPromptTaskCount }) {
     function handleChange(event) {
         const newTaskCount = parseInt(event.target.value);
-        setTranslationTaskCount(newTaskCount);
+        setPromptTaskCount(newTaskCount);
     }
 
     return (
@@ -39,8 +39,8 @@ function TranslationTaskCountSelector({ setTranslationTaskCount }) {
     );
 }
 
-function TranslationTaskFields({ numTranslationTasks }) {
-    const tasksIndexes = Array.from({ length: numTranslationTasks }, (_, i) => i);
+function PromptTaskFields({ numPromptTasks }) {
+    const tasksIndexes = Array.from({ length: numPromptTasks }, (_, i) => i);
 
     return (
         <div className="col-12">
@@ -48,10 +48,8 @@ function TranslationTaskFields({ numTranslationTasks }) {
                 <div key={index}>
                     <div className="card mb-3">
                         <div className="mx-3 mb-3">
-                            <label className="form-label" htmlFor={`translationTaskKey${index}`}>Sentance #{index + 1} to translate:</label>
-                            <input className="form-control" id={`translationTaskKey${index}`} type="text" />
-                            <label className="form-label" htmlFor={`translationTaskAnswer${index}`}>Correct translation:</label>
-                            <input className="form-control" id={`translationTaskAnswer${index}`} type="text" />
+                            <label className="form-label" htmlFor={`promptTaskKey${index}`}>Prompt #{index + 1}:</label>
+                            <input className="form-control" name="prompt" id={`promptTaskKey${index}`} type="text" />
                         </div>
                     </div>
                 </div>
@@ -61,8 +59,31 @@ function TranslationTaskFields({ numTranslationTasks }) {
 }
 
 function FinishedButton({ setIsConfiguringAssignment }) {
-    function finish() {
-        setIsConfiguringAssignment(false);
+    async function finish() {
+        try {
+            const promptElements = document.getElementsByName("prompt");
+            let promptsList = [];
+            for (let i = 0; i < promptElements.length; i++) {
+                promptsList.push(promptElements[i].value);
+            }
+
+            const options = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ promptsList })
+            };
+            const response = await fetch(`/add-prompts`, options);
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.statusText}`);
+            }
+
+            setIsConfiguringAssignment(false);
+        } catch (error) {
+            console.error("Error in finish function:", error);
+            alert('An error occurred while saving prompts. Please try again.');
+        }
     }
 
     return (

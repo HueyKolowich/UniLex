@@ -79,6 +79,27 @@ app.get('/generate-video-token', (req, res) => {
   res.json({ videoToken });
 });
 
+app.post('/add-prompts', async (req, res) => {
+  try {
+    const classRoomId = await DB.getClassRoomIdByToken(req.cookies[authCookieName]);
+    if (!classRoomId) {
+      return res.status(401).json({ error: 'Invalid or missing authentication token' });
+    }
+
+    const { promptsList } = req.body;
+    if (!Array.isArray(promptsList)) {
+      return res.status(400).json({ error: 'Invalid promptsList format' });
+    }
+
+    await DB.addPrompts(classRoomId, promptsList);
+
+    res.status(200).json({ message: 'Prompts added successfully' });
+  } catch (error) {
+    console.error('Error adding prompts:', error);
+    res.status(500).json({ error: 'An error occurred while adding prompts' });
+  }
+});
+
 const server = app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
