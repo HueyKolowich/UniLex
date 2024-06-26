@@ -60,9 +60,9 @@ async function addPrompts(classRoomId, promptsList) {
   await promptsCollection.updateOne(filter, updateDoc, options);
 }
 
-async function getPrompt(position) {
+async function getPrompt(classRoomId, position) {
   const result = await promptsCollection.findOne(
-    { classRoomId: "1" },
+    { classRoomId: classRoomId },
     { projection: { promptsList: { $slice: [position, 1] } } }
   );
   if (result && result.promptsList.length > 0) {
