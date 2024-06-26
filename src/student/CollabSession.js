@@ -3,8 +3,10 @@ export default class CollabSession {
     socket;
     messageQueue;
     onMessageCallback;
+    classRoomId;
 
-    constructor(videoToken, onMessageCallback) {
+    constructor(classRoomId, videoToken, onMessageCallback) {
+        this.classRoomId = classRoomId;
         this.videoToken = videoToken;
         this.onMessageCallback = onMessageCallback;
         this.configureWebSocket();
@@ -12,7 +14,7 @@ export default class CollabSession {
 
     configureWebSocket() {
         const protocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
-        this.socket = new WebSocket(`${protocol}://${window.location.host}/ws?token=${this.videoToken}`);
+        this.socket = new WebSocket(`${protocol}://${window.location.host}/ws?classRoomId=${this.classRoomId}&videoToken=${this.videoToken}`);
 
         this.messageQueue = [];
 
