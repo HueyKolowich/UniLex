@@ -1,5 +1,5 @@
 const webSocketMessageTypes = {
-    MeetingId: "MeetingId",
+    Initialize: "Initialize",
     GetPrompt: "GetPrompt"
 }
 
