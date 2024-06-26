@@ -55,7 +55,7 @@ function MeetingView({ onMeetingLeave }) {
     };
 
     return (
-        <div className="container">
+        <div className="container mt-5">
         {joined && joined === "JOINED" ? (
             <div className="row my-3 mx-3 d-flex justify-content-center"> 
             {[...participants.keys()].map((participantId) => (
