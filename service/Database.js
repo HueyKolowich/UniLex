@@ -34,14 +34,15 @@ async function generateNewSessionAuthToken(name) {
   return newToken;
 }
 
-async function createUser(name, password, role) {
+async function createUser(name, password, role, classRoomId) {
   const passwordHash = await bcrypt.hash(password, 10);
 
   const user = {
     name: name,
     password: passwordHash,
     token: uuid.v4(),
-    role: role
+    role: role,
+    classRoomId: classRoomId
   };
   await userCollection.insertOne(user);
 

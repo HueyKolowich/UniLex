@@ -23,7 +23,7 @@ app.post('/create', async (req, res) => {
   if (await DB.getUser(req.body.name)) {
     res.status(409).send({ msg: 'Existing user' });
   } else {
-    const user = await DB.createUser(req.body.name, req.body.password, req.body.role);
+    const user = await DB.createUser(req.body.name, req.body.password, req.body.role, req.body.classRoomId);
 
     res.send({
       id: user._id,
