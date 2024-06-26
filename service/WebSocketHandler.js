@@ -5,28 +5,32 @@ const fetch = require('node-fetch');
 const DB = require('./Database.js');
 
 const groups = new Map();
+const locks = new Map();
+const promptCounters = new Map();
 
 function webSocketHandler(server) {
     const wss = new WebSocketServer({ noServer: true });
 
     server.on('upgrade', (request, socket, head) => {
         const { query } = url.parse(request.url, true);
-        const token = query.token;
+        const classRoomId = query.classRoomId;
+        const videoToken = query.videoToken;
 
-        if (!token) {
+        if (!videoToken || !classRoomId) {
             socket.destroy();
             return;
         }
 
         wss.handleUpgrade(request, socket, head, function done(ws) {
-            ws.token = token;
+            ws.classRoomId = classRoomId;
+            ws.videoToken = videoToken;
             wss.emit('connection', ws, request);
         });
     });
 
     wss.on('connection', async (ws) => {
-        const connection = { id: uuid.v4(), ws: ws };
-        await groupManager(connection, ws.token);
+        const connection = { id: uuid.v4(), ws: ws, classRoomId: ws.classRoomId};
+        await groupManager(connection, ws.videoToken);
 
         logGroups();
 
@@ -39,31 +43,54 @@ function webSocketHandler(server) {
                 const group = groups.get(groupKey);
 
                 switch (webSocketRequestType) {
-                    case "MeetingId":
+                    case "Initialize":
                         group.forEach((c) => {
-                            c.ws.send(JSON.stringify({"type" : "MeetingId", "data" : groupKey}));
+                            c.ws.send(JSON.stringify({"type" : "Initialize", "MeetingId" : groupKey, "UpdateLock" : locks.get(groupKey), "ClientId" : c.id}));
                         });
                         break;
                     case "GetPrompt":
-                        const newPromptPosition = dataAsJSON.currentPromptPosition + 1;
+                        const currentCount = promptCounters.get(groupKey) || 0;
+                        const increment = currentCount % 2 === 0 ? 1 : 0;
+                        const newPromptPosition = dataAsJSON.currentPromptPosition + increment;
+                        const clientId = connection.id;
 
-                        try {
-                            const newPrompt = await DB.getPrompt(newPromptPosition);
-                            if (newPrompt) {
+                        if (locks.get(groupKey) === clientId) {
+                            const otherClient = Array.from(group).find(c => c.id !== clientId);
+
+                            try {
+                                if (otherClient) {
+                                    const newPrompt = await DB.getPrompt(otherClient.classRoomId, newPromptPosition);
+
+                                    if (newPrompt) {
+                                        group.forEach((c) => {
+                                            c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPromptPosition": newPromptPosition, "newPrompt": newPrompt }));
+                                        });
+                                    } else {
+                                        group.forEach((c) => {
+                                            c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPromptPosition": newPromptPosition, "newPrompt": "Finished/Terminado" }));
+                                            c.ws.send(JSON.stringify({ "type": "UpdateLock", "clientWithLock": null }));
+                                        });
+                                    }
+                                }
+                            } catch (error) {
+                                console.error('Error getting prompt:', error);
                                 group.forEach((c) => {
-                                    c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPromptPosition": newPromptPosition, "newPrompt": newPrompt }));
-                                });
-                            } else {
-                                group.forEach((c) => {
-                                    c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPromptPosition": newPromptPosition, "newPrompt": "Finished/Terminado" }));
+                                    c.ws.send(JSON.stringify({ "type": "GetPrompt", "error": "Error retrieving prompt" }));
                                 });
                             }
-                        } catch (error) {
-                            console.error('Error getting prompt:', error);
-                            group.forEach((c) => {
-                                c.ws.send(JSON.stringify({ "type": "GetPrompt", "error": "Error retrieving prompt" }));
-                            });
+
+                            if (otherClient) {
+                                locks.set(groupKey, otherClient.id);
+                                group.forEach((c) => {
+                                    c.ws.send(JSON.stringify({ "type": "UpdateLock", "clientWithLock": otherClient.id }));
+                                });
+                            }
+
+                            promptCounters.set(groupKey, currentCount + 1);
+                        } else {
+                            ws.send(JSON.stringify({ "type": "GetPrompt", "error": "You don't have the lock" }));
                         }
+
                         break;
                 }
             }
@@ -91,6 +118,8 @@ async function groupManager(connection, token) {
     if (!groupKey) {
         groupKey = await generateMeetingId(token);
         groups.set(groupKey, new Set([connection]));
+        locks.set(groupKey, connection.id);
+        promptCounters.set(groupKey, 0);
     }
 }
 
@@ -108,6 +137,8 @@ function removeConnectionFromGroup(connection) {
         if (value.delete(connection)) {
             if (value.size === 0) {
                 groups.delete(key);
+                locks.delete(key);
+                promptCounters.delete(key);
             }
             break;
         }
