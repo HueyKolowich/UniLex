@@ -19,6 +19,8 @@ function LoginBody({ setCurrentPage, setUserRole }) {
         const authenticationResult = await authenticationResponse.json();
 
         if (authenticationResult.msg.includes("Success")) {
+            localStorage.setItem("classRoomId", authenticationResult.classRoomId);
+
             if (authenticationResult.role.includes("student")) {
                 setUserRole("student");
                 setCurrentPage(pages.Collab);
