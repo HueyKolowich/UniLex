@@ -7,13 +7,19 @@ function CollabBody() {
     const [collabSession, setCollabSession] = useState(null);
     const [meetingId, setMeetingId] = useState(null);
     const [videoToken, setVideoToken] = useState(null);
-    const [currentPrompt, setCurrentPrompt] = useState({"position" : -1, "prompt" : "..."});
+    const [currentPrompt, setCurrentPrompt] = useState({"position" : -1, "prompt" : ""});
+    const [clientWithLock, setClientWithLock] = useState(null);
+    const [clientId, setClientId] = useState(null);
 
     useEffect(() => {
         const initializeSession = async () => {
-            const token = await getVideoToken();
-            setVideoToken(token);
-            const session = new CollabSession(token, (message) => handleWebSocketMessage(message, setMeetingId, setCurrentPrompt));
+            const vidToken = await getVideoToken();
+            setVideoToken(vidToken);
+            const session = new CollabSession(
+                localStorage.getItem("classRoomId"), 
+                vidToken, 
+                (message) => handleWebSocketMessage(message, setMeetingId, setCurrentPrompt, setClientWithLock, setClientId)
+            );
             setCollabSession(session);
         };
 
@@ -28,7 +34,7 @@ function CollabBody() {
 
     useEffect(() => {
         if (collabSession) {
-            collabSession.send({ WebSocketRequestType: webSocketMessageTypes.MeetingId });
+            collabSession.send({ WebSocketRequestType: webSocketMessageTypes.Initialize });
             collabSession.send({ WebSocketRequestType: webSocketMessageTypes.GetPrompt, "currentPromptPosition" : currentPrompt.position});
         }
     }, [collabSession]);
@@ -38,7 +44,7 @@ function CollabBody() {
             {meetingId ? (
                 <div>
                     <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} />
-                    <DiscussionPrompt currentPrompt={currentPrompt} collabSession={collabSession} />
+                    <DiscussionPrompt currentPrompt={currentPrompt} collabSession={collabSession} clientWithLock={clientWithLock} clientId={clientId} />
                 </div>
             ) : (
                 <div className="d-flex justify-content-center align-items-center">
@@ -49,7 +55,7 @@ function CollabBody() {
     );
 }
 
-function DiscussionPrompt({ currentPrompt, collabSession }) {
+function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, clientId }) {
     return (
         <div>
             <div className="card my-5">
@@ -61,7 +67,7 @@ function DiscussionPrompt({ currentPrompt, collabSession }) {
                 </div>
             </div>
             <div className="d-flex justify-content-center">
-                <NextPromptButton currentPromptPosition={currentPrompt.position} collabSession={collabSession} />
+                <NextPromptButton currentPromptPosition={currentPrompt.position} collabSession={collabSession} clientWithLock={clientWithLock} clientId={clientId} />
             </div>
         </div>
     );
@@ -73,27 +79,35 @@ function DiscussionPromptText({ prompt }) {
     );
 }
 
-function NextPromptButton({ currentPromptPosition, collabSession }) {
+function NextPromptButton({ currentPromptPosition, collabSession, clientWithLock, clientId }) {
     function next() {
         collabSession.send({ WebSocketRequestType: webSocketMessageTypes.GetPrompt, "currentPromptPosition" : currentPromptPosition});
     }
 
     return (
-        <button type="button" className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="nextPromptButton" onClick={next}>
+        <button type="button" className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="nextPromptButton" onClick={next} hidden={clientWithLock !== clientId}>
             Next/Siguente
         </button>
     );
 }
 
-const handleWebSocketMessage = (message, setMeetingId, setCurrentPrompt) => {
+const handleWebSocketMessage = (message, setMeetingId, setCurrentPrompt, setClientWithLock, setClientId) => {
     const messageObject = JSON.parse(message);
 
     switch (messageObject.type) {
-        case "MeetingId":
-            setMeetingId(messageObject.data);
+        case "Initialize":
+            setClientId(messageObject.ClientId);
+            setClientWithLock(messageObject.UpdateLock);
+            setMeetingId(messageObject.MeetingId);
             break;
         case "GetPrompt":
             setCurrentPrompt({"position" : messageObject.newPromptPosition, "prompt" : messageObject.newPrompt});
+            break;
+        case "UpdateLock":
+            setClientWithLock(messageObject.clientWithLock);
+            break;
+        case "ClientId":
+            setClientId(messageObject.clientId);
             break;
     }
 };
