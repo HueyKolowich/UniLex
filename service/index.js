@@ -46,7 +46,7 @@ app.post('/login', async (req, res) => {
         httpOnly: true,
         secure: true
       })
-      res.status(200).send({ msg: "Success", role: user.role });
+      res.status(200).send({ msg: "Success", role: user.role, classRoomId: user.classRoomId});
       return;
     }
   }
