@@ -86,7 +86,7 @@ function NextPromptButton({ currentPromptPosition, collabSession, clientWithLock
 
     return (
         <button type="button" className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="nextPromptButton" onClick={next} hidden={clientWithLock !== clientId}>
-            Next/Siguente
+            Next/Siguiente
         </button>
     );
 }
