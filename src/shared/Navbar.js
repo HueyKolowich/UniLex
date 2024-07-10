@@ -1,12 +1,12 @@
 import pages from "./Pages";
 
-function Navbar({ setCurrentPage }) {
+function Navbar({ setCurrentPage, setStudentModule }) {
     return (
         <nav className="navbar navbar-expand-lg mb-4 mt-1 mx-1">
             <div className="container-fluid">
                 <span className="navbar-brand bold ms-3">Unite</span>
                 <ul className="navbar-nav me-3">
-                <NavItem setCurrentPage={setCurrentPage} navItemText="Students" pageLink={pages.Collab} />
+                <NavItem setCurrentPage={setCurrentPage} navItemText="Students" pageLink={pages.Collab} setStudentModule={setStudentModule} />
                 <NavItem setCurrentPage={setCurrentPage} navItemText="Teachers" pageLink={pages.TMC} />
                 <LogoutButton setCurrentPage={setCurrentPage} />
                 </ul>        
@@ -15,9 +15,14 @@ function Navbar({ setCurrentPage }) {
     );
 }
 
-function NavItem({ setCurrentPage, navItemText, pageLink }) {
+function NavItem({ setCurrentPage, navItemText, pageLink, setStudentModule}) {
     function updateCurrentPage() {
         localStorage.setItem("currentPage", pageLink);
+
+        if(localStorage.getItem("currentPage") === pages.Collab) {
+            setStudentModule("");
+        }
+        
         setCurrentPage(pageLink);
     };
 
@@ -31,6 +36,10 @@ function NavItem({ setCurrentPage, navItemText, pageLink }) {
 function LogoutButton({ setCurrentPage }) {
     function updateCurrentPage() {
         localStorage.setItem("currentPage", pages.Default);
+        localStorage.removeItem("username");
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("classRoomId");
+        
         setCurrentPage(pages.Default);
     };
 

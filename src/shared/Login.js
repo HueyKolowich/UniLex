@@ -14,11 +14,12 @@ function LoginBody({ setCurrentPage, setUserRole }) {
               'Content-Type': 'application/json'
             },
             credentials: "include",
-            body: JSON.stringify({"name":username,"password":password})
+            body: JSON.stringify({"username":username,"password":password})
         });
         const authenticationResult = await authenticationResponse.json();
 
         if (authenticationResult.msg.includes("Success")) {
+            localStorage.setItem("username", authenticationResult.username)
             localStorage.setItem("classRoomId", authenticationResult.classRoomId);
 
             if (authenticationResult.role.includes("student")) {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -7,11 +7,20 @@ import pages from "./Pages";
 import Navbar from "./Navbar";
 import LoginBody from "./Login";
 import TMCBody from "../teacher/TMC";
-import CollabBody from "../student/Collab";
+import StudentBody from "../student/StudentBody";
 
 function App() {
-  const [userRole, setUserRole] = useState("");
-  const [currentPage, setCurrentPage] = useState(discoverCurrentPage());
+  const [userRole, setUserRole] = useState(() => discoverUserRole());
+  const [currentPage, setCurrentPage] = useState(() => discoverCurrentPage());
+  const [studentModule, setStudentModule] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("currentPage", currentPage);
+  }, [currentPage]);
+
+  useEffect(() => {
+    localStorage.setItem("userRole", userRole);
+  }, [userRole]);
 
   let bodyContent;
   switch (currentPage) {
@@ -19,6 +28,7 @@ function App() {
       if (preventAccessOutsideOfRole(userRole, currentPage)) {
         bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
       } else {
+        localStorage.setItem("currentPage", pages.TMC);
         bodyContent = <TMCBody />;
       }
       break;
@@ -26,10 +36,10 @@ function App() {
       if (preventAccessOutsideOfRole(userRole, currentPage)) {
         bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
       } else {
-        bodyContent = <CollabBody />;
+        localStorage.setItem("currentPage", pages.Collab);
+        bodyContent = <StudentBody studentModule={studentModule} setStudentModule={setStudentModule} />;
       }
       break;
-    case pages.Default:
     default:
       bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
       break;
@@ -37,7 +47,7 @@ function App() {
 
   return (
     <div>
-      <Navbar setCurrentPage={setCurrentPage} />
+      <Navbar setCurrentPage={setCurrentPage} setStudentModule={setStudentModule} />
       {bodyContent}
     </div>
   );
@@ -45,6 +55,10 @@ function App() {
 
 function discoverCurrentPage() {
   return localStorage.getItem("currentPage") || pages.Default;
+}
+
+function discoverUserRole() {
+  return localStorage.getItem("userRole") || "";
 }
 
 /**

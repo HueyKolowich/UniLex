@@ -20,10 +20,10 @@ app.use(cookieParser());
 app.use(express.static('../build')); //!IMPORTANT When pushed to dist folder this must be changed to './build'
 
 app.post('/create', async (req, res) => {
-  if (await DB.getUser(req.body.name)) {
+  if (await DB.getUser(req.body.username)) {
     res.status(409).send({ msg: 'Existing user' });
   } else {
-    const user = await DB.createUser(req.body.name, req.body.password, req.body.role, req.body.classRoomId);
+    const user = await DB.createUser(req.body.username, req.body.password, req.body.role, req.body.classRoomId);
 
     res.send({
       id: user._id,
@@ -32,10 +32,10 @@ app.post('/create', async (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-  const user = await DB.getUser(req.body.name);
+  const user = await DB.getUser(req.body.username);
   if (user) {
     if (await bcrypt.compare(req.body.password, user.password)) {
-      const newToken = await DB.generateNewSessionAuthToken(req.body.name);
+      const newToken = await DB.generateNewSessionAuthToken(req.body.username);
 
       res.cookie(authCookieName, newToken, {
         httpOnly: true,
@@ -46,7 +46,7 @@ app.post('/login', async (req, res) => {
         httpOnly: true,
         secure: true
       })
-      res.status(200).send({ msg: "Success", role: user.role, classRoomId: user.classRoomId});
+      res.status(200).send({ msg: "Success", role: user.role, username: user.username, classRoomId: user.classRoomId});
       return;
     }
   }
@@ -79,6 +79,34 @@ app.get('/generate-video-token', (req, res) => {
   res.json({ videoToken });
 });
 
+app.get('/current-meeting-scheduled', async (req, res) => {
+  try {
+    const token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    const events = await DB.getBookedEvents(user.username);
+    const now = new Date();
+
+    let result = false;
+
+    for (const event of events) {
+      const start = new Date(event.start);
+      const end = new Date(event.end);
+
+      if (start <= now && now <= end) {
+        result = true;
+        break;
+      }
+    }
+
+    res.status(200).json({ result: result });
+  } catch (error) {
+    console.error('Error checking if there is a current meeting scheduled:', error);
+    res.status(500).json({ error: 'An error occurred while checking if there is a current meeting scheduled' });
+  }
+});
+
+
 app.post('/add-prompts', async (req, res) => {
   try {
     const classRoomId = await DB.getClassRoomIdByToken(req.cookies[authCookieName]);
@@ -97,6 +125,114 @@ app.post('/add-prompts', async (req, res) => {
   } catch (error) {
     console.error('Error adding prompts:', error);
     res.status(500).json({ error: 'An error occurred while adding prompts' });
+  }
+});
+
+app.get('/events', async (req, res) => {
+  try {
+    token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    const events = await DB.getEvents(user.firstname, user.username, user.target);
+    res.status(200).json({ events: events });
+  } catch (error) {
+    console.error("Error getting events:", error);
+    res.status(500).json({ error: "An error occurred while getting events" });
+  }
+});
+
+app.delete('/events', async (req, res) => {
+  const { calEventId } = req.body;
+
+  try {
+    token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    await DB.deleteEvent(calEventId);
+
+    const events = await DB.getEvents(user.firstname, user.username, user.target);
+    res.status(200).json({ events: events });
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    res.status(500).json({ error: "An error occurred while deleting event" });
+  }
+});
+
+app.post('/events', async (req, res) => {
+  const { start, end } = req.body;
+
+  try {
+    token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    await DB.addEvent(user.username, user.firstname, user.location, start, end, user.native, user.target);
+    res.status(201).json({ message: 'Event added successfully', title: user.firstname, details: user.location });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while adding the event' });
+  }
+});
+
+app.post('/events-status', async (req, res) => {
+  const { calEventId } = req.body;
+
+  try {
+    token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    await DB.changeEventStatus(calEventId, user.username);
+
+    const events = await DB.getEvents(user.firstname, user.username, user.target);
+    res.status(200).json({ events: events });
+  } catch (error) {
+    console.error("Error changing status of event:", error);
+    res.status(500).json({ error: "An error occurred while changing the status of an event" });
+  }
+});
+
+app.delete('/events-status', async (req, res) => {
+  const { calEventId } = req.body;
+
+  try {
+    token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    await DB.removeNameFromEventParticipantList(calEventId);
+
+    const events = await DB.getEvents(user.firstname, user.username, user.target);
+    res.status(200).json({ events: events });
+  } catch (error) {
+    console.error("Error changing status of event:", error);
+    res.status(500).json({ error: "An error occurred while changing the status of an event" });
+  } 
+});
+
+app.get('/meetingcount', async (req, res) => {
+  try {
+    token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    const result = await DB.getDesiredMeetingsCountForUser(user.username);
+
+    res.status(200).json({ count: result });
+  } catch (error) {
+    console.error("Error getting desired meetings count for user:", error);
+    res.status(500).json({ error: "An error occurred while getting desired meetings count for user" });
+  }
+});
+
+app.post('/meetingcount', async (req, res) => {
+  const { meetingsCount } = req.body;
+
+  try {
+    token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    await DB.setDesiredMeetingsCountForUser(user.username, meetingsCount);
+
+    res.status(200).json({ msg: "Success" });
+  } catch (error) {
+    console.error("Error setting desired meetings count for user:", error);
+    res.status(500).json({ error: "An error occurred while setting desired meetings count for user" });
   }
 });
 
