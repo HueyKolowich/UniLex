@@ -11,7 +11,7 @@ h3 {
   margin-top: .5rem !important;
 }
 
-p {
+p,.DiscussionPromptText {
   color: #ce66d2 !important;
 }
 

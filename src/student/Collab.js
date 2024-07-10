@@ -60,9 +60,9 @@ function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, client
         <div>
             <div className="card my-5">
                 <div className="card-header">
-                    Discuss/Discutan:
+                    Discuss:
                 </div>
-                <div className="card-body">
+                <div className="card-body text-center">
                     <DiscussionPromptText prompt={currentPrompt.prompt} />
                 </div>
             </div>
@@ -75,7 +75,7 @@ function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, client
 
 function DiscussionPromptText({ prompt }) {
     return (
-        <p className="my-1">{prompt}</p>
+        <h4 className="my-1 DiscussionPromptText">{prompt}</h4>
     );
 }
 
@@ -86,7 +86,7 @@ function NextPromptButton({ currentPromptPosition, collabSession, clientWithLock
 
     return (
         <button type="button" className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="nextPromptButton" onClick={next} hidden={clientWithLock !== clientId}>
-            Next/Siguiente
+            Next
         </button>
     );
 }
