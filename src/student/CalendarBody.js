@@ -232,18 +232,18 @@ function CalendarBody() {
       />
 
       <Dialog open={eventModalOpen} onClose={handleEventClose}>
-        <DialogTitle>Schedule meeting with:</DialogTitle>
+        <DialogTitle sx={{color: "#ce66d2"}}>Schedule meeting with:</DialogTitle>
         <DialogContent>
-          <div>
-            <h1>{selectedEventDetails?.title}</h1>
-            <h1>{selectedEventDetails?.details}</h1>
+          <div className="text-center">
+            <h1 style={{color: "#c751cb"}}>{selectedEventDetails?.title}</h1>
+            <h4 style={{color: "#ce66d2"}}>{selectedEventDetails?.details}</h4>
           </div>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => handleEventClose()} color="primary">
+        <DialogActions sx={{justifyContent: "center"}}>
+          <Button onClick={() => handleEventClose()} style={{color: "#ce66d2"}}>
             Cancel
           </Button>
-          <Button onClick={() => handleEventSave(selectedEventDetails)} color="primary">
+          <Button onClick={() => handleEventSave(selectedEventDetails)} style={{color: "#ce66d2"}}>
             Schedule
           </Button>
         </DialogActions>
