@@ -12,7 +12,7 @@ import StudentBody from "../student/StudentBody";
 function App() {
   const [userRole, setUserRole] = useState(() => discoverUserRole());
   const [currentPage, setCurrentPage] = useState(() => discoverCurrentPage());
-  const [studentModule, setStudentModule] = useState("");
+  const [studentModule, setStudentModule] = useState(() => discoverStudentModule());
 
   useEffect(() => {
     localStorage.setItem("currentPage", currentPage);
@@ -21,6 +21,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("userRole", userRole);
   }, [userRole]);
+
+  useEffect(() => {
+    localStorage.setItem("studentModule", studentModule);
+  }, [studentModule]);
 
   let bodyContent;
   switch (currentPage) {
@@ -59,6 +63,10 @@ function discoverCurrentPage() {
 
 function discoverUserRole() {
   return localStorage.getItem("userRole") || "";
+}
+
+function discoverStudentModule() {
+  return localStorage.getItem("studentModule") || "";
 }
 
 /**

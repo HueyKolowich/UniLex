@@ -200,7 +200,7 @@ function CalendarBody() {
 
   return (
     <div>
-      <div className="container-fluid">
+      {/* <div className="container-fluid">
         <div className="row mb-4 d-flex align-items-center justify-content-center">
           <CalendarDesiredMeetingsCard />
           <div className="col-md-4 mx-5">
@@ -212,7 +212,7 @@ function CalendarBody() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <Calendar
         defaultDate={moment().toDate()}
@@ -228,7 +228,7 @@ function CalendarBody() {
         formats={formats}
         eventPropGetter={eventStyleGetter}
         selectable
-        style={{ height: "65vh" }}
+        style={{ height: "90vh" }}
       />
 
       <Dialog open={eventModalOpen} onClose={handleEventClose}>
