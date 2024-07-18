@@ -36,11 +36,6 @@ export default class CollabSession {
         this.socket.addEventListener('error', (error) => {
             console.error('WebSocket error:', error);
         });
-
-        this.socket.addEventListener('close', () => {
-            console.warn('WebSocket connection closed. Attempting to reconnect...');
-            setTimeout(() => this.configureWebSocket(), 5000); // Reconnect after 5 seconds
-        });
     }
 
     send(webSocketRequest) {

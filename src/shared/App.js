@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -26,6 +26,19 @@ function App() {
     localStorage.setItem("studentModule", studentModule);
   }, [studentModule]);
 
+  const collabSessionRef = useRef(null);
+  const leaveRef = useRef(null);
+
+  const cleanup = () => {
+    if (collabSessionRef.current && collabSessionRef.current.socket) {
+      collabSessionRef.current.socket.close();
+    }
+
+    if (leaveRef.current) {
+      leaveRef.current();
+    }
+  };
+
   let bodyContent;
   switch (currentPage) {
     case pages.TMC:
@@ -41,7 +54,7 @@ function App() {
         bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
       } else {
         localStorage.setItem("currentPage", pages.Collab);
-        bodyContent = <StudentBody studentModule={studentModule} setStudentModule={setStudentModule} />;
+        bodyContent = <StudentBody studentModule={studentModule} setStudentModule={setStudentModule} collabSessionRef={collabSessionRef} leaveRef={leaveRef} />;
       }
       break;
     default:
@@ -51,7 +64,7 @@ function App() {
 
   return (
     <div>
-      <Navbar setCurrentPage={setCurrentPage} setStudentModule={setStudentModule} />
+      <Navbar setCurrentPage={setCurrentPage} setStudentModule={setStudentModule} cleanup={cleanup} />
       {bodyContent}
     </div>
   );

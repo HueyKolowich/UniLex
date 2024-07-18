@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import CalendarBody from "./CalendarBody";
 import CollabBody from "./Collab";
 
-function StudentBody({ studentModule, setStudentModule }) {
+function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveRef }) {
     const [isMeetingEntryDisabled, setIsMeetingEntryDisabled] = useState(true);
 
     useEffect(() => {
@@ -25,7 +25,7 @@ function StudentBody({ studentModule, setStudentModule }) {
             bodyContent = <CalendarBody />;
             break;
         case "collab":
-            bodyContent = <CollabBody />;
+            bodyContent = <CollabBody collabSessionRef={collabSessionRef} leaveRef={leaveRef} />;
             break;
         default:
             bodyContent = 

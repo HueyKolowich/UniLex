@@ -3,7 +3,7 @@ import CollabSession from './CollabSession.js';
 import { getVideoToken, VideoSDKMeetingProvider } from './Video.js';
 import webSocketMessageTypes from '../shared/WebSocketMessageTypes.js';
 
-function CollabBody() {
+function CollabBody({ collabSessionRef, leaveRef }) {
     const [collabSession, setCollabSession] = useState(null);
     const [meetingId, setMeetingId] = useState(null);
     const [videoToken, setVideoToken] = useState(null);
@@ -22,6 +22,7 @@ function CollabBody() {
                     vidToken, 
                     (message) => handleWebSocketMessage(message)
                 );
+                collabSessionRef.current = session;
                 setCollabSession(session);
             } catch (error) {
                 console.error('Error initializing session:', error);
@@ -79,7 +80,7 @@ function CollabBody() {
                 <div className="container-fluid">
                     <div className="row mt-5 d-flex justify-content-between align-items-stretch">
                         <div className="col-md-9">
-                            <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} />
+                            <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} leaveRef={leaveRef} />
                         </div>
                         <div className="col-md-3">
                             <PromptHelps promptHelps={promptHelps} />

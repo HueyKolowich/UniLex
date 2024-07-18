@@ -14,7 +14,7 @@ async function getVideoToken() {
     return videoToken.videoToken;
 }
 
-function VideoSDKMeetingProvider({ videoToken, meetingId, setMeetingId }) {
+function VideoSDKMeetingProvider({ videoToken, meetingId, setMeetingId, leaveRef }) {
     const onMeetingLeave = () => {
         setMeetingId(null);
     };
@@ -30,19 +30,25 @@ function VideoSDKMeetingProvider({ videoToken, meetingId, setMeetingId }) {
         token={videoToken}
         joinWithoutUserInteraction={true}
         >
-        <MeetingView onMeetingLeave={onMeetingLeave} />
+        <MeetingView onMeetingLeave={onMeetingLeave} leaveRef={leaveRef} />
         </MeetingProvider>
     ) : (
         <p>Missing credentials to start a meeting... please re-try</p>
     );
 }
 
-function MeetingView({ onMeetingLeave }) {
-    const { participants } = useMeeting({
+function MeetingView({ onMeetingLeave, leaveRef }) {
+    const { participants, leave } = useMeeting({
         onMeetingLeft: () => {
             onMeetingLeave();
         },
     });
+
+    useEffect(() => {
+        if (leaveRef) {
+            leaveRef.current = leave;
+        }
+    }, [leave, leaveRef]);
 
     return (
         <div className="container">

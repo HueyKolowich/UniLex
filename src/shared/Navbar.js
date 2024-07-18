@@ -1,22 +1,35 @@
 import pages from "./Pages";
 
-function Navbar({ setCurrentPage, setStudentModule }) {
+function Navbar({ setCurrentPage, setStudentModule, cleanup }) {
     return (
         <nav className="navbar navbar-expand-lg mb-4 mt-1 mx-1">
             <div className="container-fluid">
                 <span className="navbar-brand bold ms-3">Unite</span>
                 <ul className="navbar-nav me-3">
-                <NavItem setCurrentPage={setCurrentPage} navItemText="Students" pageLink={pages.Collab} setStudentModule={setStudentModule} />
-                <NavItem setCurrentPage={setCurrentPage} navItemText="Teachers" pageLink={pages.TMC} />
-                <LogoutButton setCurrentPage={setCurrentPage} />
+                <NavItem 
+                    setCurrentPage={setCurrentPage} 
+                    navItemText="Students" 
+                    pageLink={pages.Collab} 
+                    setStudentModule={setStudentModule}
+                    cleanup={cleanup}
+                />
+                <NavItem 
+                    setCurrentPage={setCurrentPage} 
+                    navItemText="Teachers" 
+                    pageLink={pages.TMC}
+                    cleanup={cleanup}
+                />
+                <LogoutButton setCurrentPage={setCurrentPage} cleanup={cleanup} />
                 </ul>        
             </div>
         </nav>
     );
 }
 
-function NavItem({ setCurrentPage, navItemText, pageLink, setStudentModule}) {
+function NavItem({ setCurrentPage, navItemText, pageLink, setStudentModule, cleanup }) {
     function updateCurrentPage() {
+        cleanup();
+
         localStorage.setItem("currentPage", pageLink);
 
         if(localStorage.getItem("currentPage") === pages.Collab) {
@@ -33,8 +46,10 @@ function NavItem({ setCurrentPage, navItemText, pageLink, setStudentModule}) {
     );
 }
 
-function LogoutButton({ setCurrentPage }) {
+function LogoutButton({ setCurrentPage, cleanup }) {
     function updateCurrentPage() {
+        cleanup();
+
         localStorage.setItem("currentPage", pages.Default);
         localStorage.removeItem("username");
         localStorage.removeItem("userRole");
