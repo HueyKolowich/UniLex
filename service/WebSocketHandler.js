@@ -3,6 +3,9 @@ const uuid = require('uuid');
 const url = require('url');
 const fetch = require('node-fetch');
 const DB = require('./Database.js');
+const OpenAI = require('openai');
+
+const openai = new OpenAI();
 
 const groups = new Map();
 const locks = new Map();
@@ -62,8 +65,10 @@ function webSocketHandler(server) {
                                     const newPrompt = await DB.getPrompt(otherClient.classRoomId, newPromptPosition);
 
                                     if (newPrompt) {
+                                        const promptHelps = await generatePromptHelps(newPrompt);
+
                                         group.forEach((c) => {
-                                            c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPromptPosition": newPromptPosition, "newPrompt": newPrompt }));
+                                            c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPromptPosition": newPromptPosition, "newPrompt": newPrompt, "promptHelps": promptHelps }));
                                         });
                                     } else {
                                         group.forEach((c) => {
@@ -161,6 +166,19 @@ async function generateMeetingId(token) {
         console.log("error", error);
         throw error;
     }
+}
+
+async function generatePromptHelps(prompt) {
+    const formattedPrompt = "Make an array titled words of 5 words (either in English or Spanish depending on the language of the question) that are not included in the question that you would expect to hear when answering the following question:" 
+    + prompt 
+    + " return as a JSON object";
+
+    const completion = await openai.chat.completions.create({
+        messages: [{role: "user", content: formattedPrompt}],
+        model: "gpt-3.5-turbo-1106"
+    })
+
+    return completion.choices[0].message.content;
 }
 
 function logGroups() {

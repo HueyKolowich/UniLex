@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   MeetingProvider,
   // MeetingConsumer,
@@ -28,6 +28,7 @@ function VideoSDKMeetingProvider({ videoToken, meetingId, setMeetingId }) {
             name: "CollabMeeting",
         }}
         token={videoToken}
+        joinWithoutUserInteraction={true}
         >
         <MeetingView onMeetingLeave={onMeetingLeave} />
         </MeetingProvider>
@@ -37,46 +38,23 @@ function VideoSDKMeetingProvider({ videoToken, meetingId, setMeetingId }) {
 }
 
 function MeetingView({ onMeetingLeave }) {
-    const [joined, setJoined] = useState(null);
-
-    const { join, participants } = useMeeting({
-        onMeetingJoined: () => {
-            setJoined("JOINED");
-        },
-
+    const { participants } = useMeeting({
         onMeetingLeft: () => {
             onMeetingLeave();
         },
     });
 
-    const joinMeeting = () => {
-        setJoined("JOINING");
-        join();
-    };
-
     return (
-        <div className="container mt-5">
-        {joined && joined === "JOINED" ? (
-            <div className="row my-3 mx-3 d-flex justify-content-center"> 
+        <div className="container">
+            <div className="row d-flex justify-content-center"> 
             {[...participants.keys()].map((participantId) => (
-                <div className="col-md-6">
+                <div className="col-md-5">
                     <ParticipantView
-                    participantId={participantId}        
+                    participantId={participantId}
                     />
                 </div>
             ))}
             </div>
-        ) : joined && joined === "JOINING" ? (
-            <div className="d-flex justify-content-center">
-                <div className="spinner-border" role="status" />
-            </div>
-        ) : (
-            <div className="d-flex justify-content-center">
-                <button className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="JoinMeetingButton" onClick={joinMeeting}>
-                Join
-                </button>
-            </div>
-        )}
         </div>
     );
 }
@@ -111,8 +89,6 @@ function ParticipantView({ participantId }) {
         }
     }, [micStream, micOn]);
 
-    const width = window.screen.width / 3;
-
     return (
         <div className="card d-flex justify-content-center align-items-center interlocutorVideoBox">
             <audio ref={micRef} autoPlay playsInline muted={isLocal} />
@@ -125,7 +101,6 @@ function ParticipantView({ participantId }) {
                 muted={true}
                 playing={true}
                 url={videoStream}
-                width={width}
                 onError={(err) => {
                     console.log(err, "participant video error");
                 }}
