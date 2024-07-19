@@ -47,6 +47,7 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
                             whichModule={"collab"} 
                             moduleButtonText={"Join Meeting"} 
                             isDisabled={isMeetingEntryDisabled}
+                            displayCardText={"No meeting currently scheduled"}
                         />
                     </div>
                 </div>
@@ -61,7 +62,7 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
     );
 }
   
-function ModuleCard({ setStudentModule, headerText, whichModule, moduleButtonText, isDisabled }) {
+function ModuleCard({ setStudentModule, headerText, whichModule, moduleButtonText, isDisabled, displayCardText }) {
     return (
         <div className="card text-center mb-4" style={{height: "35vh"}}>
             <CardHeader text={headerText} />
@@ -70,23 +71,37 @@ function ModuleCard({ setStudentModule, headerText, whichModule, moduleButtonTex
                 whichModule={whichModule} 
                 moduleButtonText={moduleButtonText} 
                 isDisabled={isDisabled}
+                displayCardText={displayCardText}
             />      
         </div>
     );
 }
 
-function ModuleCardBody({ setStudentModule, whichModule, moduleButtonText, isDisabled }) {
+function ModuleCardBody({ setStudentModule, whichModule, moduleButtonText, isDisabled, displayCardText }) {
     function enterModule() {
         setStudentModule(whichModule);
     }
 
     return (
-        <div className="card-body d-flex align-items-center justify-content-center">
-            <ModuleCardBodyButton 
-                enterModule={enterModule} 
-                moduleButtonText={moduleButtonText} 
-                isDisabled={isDisabled}
-            />
+        <div className="card-body d-flex flex-column align-items-center justify-content-center">
+            { displayCardText && isDisabled ? (
+                <div>
+                    <p className="mb-4">{displayCardText}</p>
+                    <ModuleCardBodyButton 
+                        enterModule={enterModule} 
+                        moduleButtonText={moduleButtonText} 
+                        isDisabled={isDisabled}
+                    />
+                </div>
+            ) : (
+                <div>
+                    <ModuleCardBodyButton 
+                        enterModule={enterModule} 
+                        moduleButtonText={moduleButtonText} 
+                        isDisabled={isDisabled}
+                    />
+                </div>
+            )}
         </div>
     );
 }
