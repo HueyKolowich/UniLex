@@ -17,7 +17,7 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
         };
 
         checkForMeetings();
-    }, []);
+    });
 
     let bodyContent;
     switch (studentModule) {
