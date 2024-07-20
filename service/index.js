@@ -6,9 +6,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const DB = require('./Database.js');
 const { webSocketHandler } = require('./WebSocketHandler.js');
+const OpenAI = require('openai');
 
 const app = express();
 const port = 3000;
+
+const openai = new OpenAI();
 
 const authCookieName = 'token';
 const roleCookieName = 'role';
@@ -106,8 +109,36 @@ app.get('/current-meeting-scheduled', async (req, res) => {
   }
 });
 
+app.get('/prompts', async (req, res) => {
+  try {
+    token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
 
-app.post('/add-prompts', async (req, res) => {
+    const { promptLevel } = req.query;
+
+    const formattedPrompt = "Generate a " 
+    + user.target
+    + " discussion prompt based off the "
+    + promptLevel
+    + " ACTFL level."
+    + " Return just the prompt as a JSON object";
+
+    const completion = await openai.chat.completions.create({
+        messages: [{role: "user", content: formattedPrompt}],
+        model: "gpt-4o-mini"
+    })
+
+    let prompt = completion.choices[0].message.content;
+    prompt = sanitzeJSONResponseObjects(prompt);
+
+    res.status(200).json({ prompt });
+  } catch (error) {
+    console.error('Error generating prompt:', error);
+    res.status(500).json({ error: 'An error occurred while generating a prompt' });
+  }
+});
+
+app.post('/prompts', async (req, res) => {
   try {
     const classRoomId = await DB.getClassRoomIdByToken(req.cookies[authCookieName]);
     if (!classRoomId) {
@@ -241,3 +272,14 @@ const server = app.listen(port, () => {
 });
 
 webSocketHandler(server);
+
+function sanitzeJSONResponseObjects(input) {
+  const firstBraceIndex = input.indexOf('{');
+  const lastBraceIndex = input.lastIndexOf('}');
+  
+  if (firstBraceIndex === -1 || lastBraceIndex === -1 || firstBraceIndex >= lastBraceIndex) {
+      return '';
+  }
+  
+  return input.substring(firstBraceIndex, lastBraceIndex + 1);
+}

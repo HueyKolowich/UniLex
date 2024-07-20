@@ -1,3 +1,7 @@
+*:focus {
+  box-shadow: 0 0 0 2px #f8e9f9 !important;
+}
+
 tr {
   color: #ffffff;
 }
@@ -78,7 +82,8 @@ table {
   margin-top: .5rem;
 }
 
-.form-control {
+.form-control,
+.form-select {
   color: #ce66d2 !important;
   border: var(--bs-border-width) solid #f1d3f2 !important;
 }

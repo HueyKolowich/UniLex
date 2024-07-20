@@ -40,16 +40,81 @@ function PromptTaskCountSelector({ setPromptTaskCount }) {
 }
 
 function PromptTaskFields({ numPromptTasks }) {
+    const [promptTaskFieldValues, setPromptTaskFieldValues] = useState(Array(numPromptTasks).fill(""));
+    const [actflLevel, setActflLevel] = useState("Advanced-High");
+
     const tasksIndexes = Array.from({ length: numPromptTasks }, (_, i) => i);
+
+    function handleChange(event, index) {
+        const { name, value } = event.target;
+
+        if (name === "actflLevel") {
+            setActflLevel(value);
+        } else if (name === "promptTask") {
+            const newPromptTaskFieldValues = [...promptTaskFieldValues];
+            newPromptTaskFieldValues[index] = value;
+            setPromptTaskFieldValues(newPromptTaskFieldValues);
+        }
+    }
+
+    async function generate(index) {
+        try {
+            const response = await fetch(`/prompts?promptLevel=${actflLevel}`);
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.statusText}`);
+            }
+
+            const promptObject = await response.json();
+            const parsedPromptObject = JSON.parse(promptObject.prompt);
+            const newPromptTaskFieldValues = [...promptTaskFieldValues];
+            newPromptTaskFieldValues[index] = parsedPromptObject.prompt;
+            setPromptTaskFieldValues(newPromptTaskFieldValues);
+        } catch (error) {
+            console.error("Error in generate function:", error);
+            alert('An error occurred while generating your prompt. Please try again.');
+        }
+    }
 
     return (
         <div className="col-12">
             {tasksIndexes.map(index => (
                 <div key={index}>
                     <div className="card mb-3">
-                        <div className="mx-3 mb-3">
-                            <label className="form-label" htmlFor={`promptTaskKey${index}`}>Prompt #{index + 1}:</label>
-                            <input className="form-control" name="prompt" id={`promptTaskKey${index}`} type="text" />
+                        <div className="mx-3 my-3">
+                            <div className="row mb-3">
+                                <label className="form-label" htmlFor={`promptTaskKey${index}`}>Prompt #{index + 1}:</label>
+                                <input 
+                                    className="form-control" 
+                                    name="promptTask" 
+                                    id={`promptTaskKey${index}`} 
+                                    type="text" 
+                                    value={promptTaskFieldValues[index]}
+                                    onChange={(e) => handleChange(e, index)}
+                                />
+                            </div>
+                            <div className="row pb-1">
+                                <div className="d-flex justify-content-end">
+                                    <select 
+                                        className="form-select w-25 me-3" 
+                                        name="actflLevel" 
+                                        onChange={(e) => handleChange(e)}
+                                    >
+                                        <option selected disabled>ACTFL level</option>
+                                        <option value="Novice-Low">Novice-Low</option>
+                                        <option value="Novice-Mid">Novice-Mid</option>
+                                        <option value="Novice-High">Novice-High</option>
+                                        <option value="Intermediate-Low">Intermediate-Low</option>
+                                        <option value="Intermediate-Mid">Intermediate-Mid</option>
+                                        <option value="Intermediate-High">Intermediate-High</option>
+                                        <option value="Advanced-Low">Advanced-Low</option>
+                                        <option value="Advanced-Mid">Advanced-Mid</option>
+                                        <option value="Advanced-High">Advanced-High</option>
+                                        <option value="Superior">Superior</option>
+                                        <option value="Distinguished">Distinguished</option>
+                                    </select>
+                                    <button type="button" className="btn btn-lg btn-block btn-primary" onClick={() => generate(index)}>Generate</button>
+                                </div>                                
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -74,7 +139,7 @@ function FinishedButton({ setIsConfiguringAssignment }) {
                 },
                 body: JSON.stringify({ promptsList })
             };
-            const response = await fetch(`/add-prompts`, options);
+            const response = await fetch(`/prompts`, options);
             if (!response.ok) {
                 throw new Error(`Server error: ${response.statusText}`);
             }
