@@ -126,7 +126,7 @@ function PromptTaskFields({ numPromptTasks }) {
 function FinishedButton({ setIsConfiguringAssignment }) {
     async function finish() {
         try {
-            const promptElements = document.getElementsByName("prompt");
+            const promptElements = document.getElementsByName("promptTask");
             let promptsList = [];
             for (let i = 0; i < promptElements.length; i++) {
                 promptsList.push(promptElements[i].value);
