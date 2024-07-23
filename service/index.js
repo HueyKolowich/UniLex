@@ -1,4 +1,4 @@
-require('dotenv').config({path: __dirname +'/.env'})
+require('dotenv').config({ path: __dirname + '/.env' });
 
 const express = require('express');
 const cookieParser = require('cookie-parser');
@@ -7,30 +7,39 @@ const jwt = require('jsonwebtoken');
 const DB = require('./Database.js');
 const { webSocketHandler } = require('./WebSocketHandler.js');
 const OpenAI = require('openai');
+const morgan = require('morgan');
+const helmet = require('helmet');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 const openai = new OpenAI();
 
-const authCookieName = 'token';
-const roleCookieName = 'role';
+const authCookieName = 'authToken';
 
 app.use(express.json());
-
 app.use(cookieParser());
+app.use(express.static('../build')); // IMPORTANT: When pushed to dist folder this must be changed to './build'
 
-app.use(express.static('../build')); //!IMPORTANT When pushed to dist folder this must be changed to './build'
+app.use(morgan('combined'));
+
+app.use(helmet());
+
+app.get('/check-auth', (req, res) => {
+  const token = req.cookies[authCookieName];
+  if (token) {
+    res.status(200).send({ msg: 'authToken valid' });
+  } else {
+    res.status(401).send({ msg: 'authToken not valid' });
+  }
+});
 
 app.post('/create', async (req, res) => {
   if (await DB.getUser(req.body.username)) {
     res.status(409).send({ msg: 'Existing user' });
   } else {
     const user = await DB.createUser(req.body.username, req.body.password, req.body.role, req.body.classRoomId);
-
-    res.send({
-      id: user._id,
-    });
+    res.send({ id: user._id });
   }
 });
 
@@ -42,22 +51,24 @@ app.post('/login', async (req, res) => {
 
       res.cookie(authCookieName, newToken, {
         httpOnly: true,
-        maxAge: 18000000,
-        secure: true
-      })
-      res.cookie(roleCookieName, user.role, {
-        httpOnly: true,
-        secure: true
-      })
-      res.status(200).send({ msg: "Success", role: user.role, username: user.username, classRoomId: user.classRoomId});
+        maxAge: 9000000,
+        secure: true,
+        sameSite: 'Strict', // Adding SameSite attribute for security
+      });
+      res.status(200).send({ msg: 'Success', role: user.role, username: user.username, classRoomId: user.classRoomId });
       return;
     }
   }
-  res.status(401).send({ msg: "Unauthorized" });
+  res.status(401).send({ msg: 'Unauthorized' });
+});
+
+app.get('/logout', (req, res) => {
+  res.clearCookie(authCookieName);
+  res.end();
 });
 
 app.use(async (req, res, next) => {
-  token = req.cookies[authCookieName];
+  const token = req.cookies[authCookieName];
   const user = await DB.getUserByToken(token);
   if (user) {
     next();
@@ -67,14 +78,14 @@ app.use(async (req, res, next) => {
 });
 
 app.get('/generate-video-token', (req, res) => {
-  const options = { 
-    expiresIn: '120m', 
-    algorithm: 'HS256' 
+  const options = {
+    expiresIn: '120m',
+    algorithm: 'HS256',
   };
 
   const payload = {
     apikey: process.env.VIDEOSDK_API_KEY,
-    permissions: ['allow_join']
+    permissions: ['allow_join'],
   };
 
   const videoToken = jwt.sign(payload, process.env.VIDEOSDK_SECRET_KEY, options);
@@ -111,22 +122,22 @@ app.get('/current-meeting-scheduled', async (req, res) => {
 
 app.get('/prompts', async (req, res) => {
   try {
-    token = req.cookies[authCookieName];
+    const token = req.cookies[authCookieName];
     const user = await DB.getUserByToken(token);
 
     const { promptLevel } = req.query;
 
-    const formattedPrompt = "Generate a " 
-    + user.target
-    + " discussion prompt based off the "
-    + promptLevel
-    + " ACTFL level."
-    + " Return just the prompt as a JSON object";
+    const formattedPrompt = "Generate a "
+      + user.target
+      + " discussion prompt based off the "
+      + promptLevel
+      + " ACTFL level."
+      + " Return just the prompt as a JSON object";
 
     const completion = await openai.chat.completions.create({
-        messages: [{role: "user", content: formattedPrompt}],
-        model: "gpt-4o-mini"
-    })
+      messages: [{ role: "user", content: formattedPrompt }],
+      model: "gpt-4o-mini"
+    });
 
     let prompt = completion.choices[0].message.content;
     prompt = sanitzeJSONResponseObjects(prompt);
@@ -161,7 +172,7 @@ app.post('/prompts', async (req, res) => {
 
 app.get('/events', async (req, res) => {
   try {
-    token = req.cookies[authCookieName];
+    const token = req.cookies[authCookieName];
     const user = await DB.getUserByToken(token);
 
     const events = await DB.getEvents(user.firstname, user.username, user.target);
@@ -176,7 +187,7 @@ app.delete('/events', async (req, res) => {
   const { calEventId } = req.body;
 
   try {
-    token = req.cookies[authCookieName];
+    const token = req.cookies[authCookieName];
     const user = await DB.getUserByToken(token);
 
     await DB.deleteEvent(calEventId);
@@ -193,7 +204,7 @@ app.post('/events', async (req, res) => {
   const { start, end } = req.body;
 
   try {
-    token = req.cookies[authCookieName];
+    const token = req.cookies[authCookieName];
     const user = await DB.getUserByToken(token);
 
     await DB.addEvent(user.username, user.firstname, user.location, start, end, user.native, user.target);
@@ -207,7 +218,7 @@ app.post('/events-status', async (req, res) => {
   const { calEventId } = req.body;
 
   try {
-    token = req.cookies[authCookieName];
+    const token = req.cookies[authCookieName];
     const user = await DB.getUserByToken(token);
 
     await DB.changeEventStatus(calEventId, user.username);
@@ -224,7 +235,7 @@ app.delete('/events-status', async (req, res) => {
   const { calEventId } = req.body;
 
   try {
-    token = req.cookies[authCookieName];
+    const token = req.cookies[authCookieName];
     const user = await DB.getUserByToken(token);
 
     await DB.removeNameFromEventParticipantList(calEventId);
@@ -234,12 +245,12 @@ app.delete('/events-status', async (req, res) => {
   } catch (error) {
     console.error("Error changing status of event:", error);
     res.status(500).json({ error: "An error occurred while changing the status of an event" });
-  } 
+  }
 });
 
 app.get('/meetingcount', async (req, res) => {
   try {
-    token = req.cookies[authCookieName];
+    const token = req.cookies[authCookieName];
     const user = await DB.getUserByToken(token);
 
     const result = await DB.getDesiredMeetingsCountForUser(user.username);
@@ -255,7 +266,7 @@ app.post('/meetingcount', async (req, res) => {
   const { meetingsCount } = req.body;
 
   try {
-    token = req.cookies[authCookieName];
+    const token = req.cookies[authCookieName];
     const user = await DB.getUserByToken(token);
 
     await DB.setDesiredMeetingsCountForUser(user.username, meetingsCount);
@@ -276,10 +287,10 @@ webSocketHandler(server);
 function sanitzeJSONResponseObjects(input) {
   const firstBraceIndex = input.indexOf('{');
   const lastBraceIndex = input.lastIndexOf('}');
-  
+
   if (firstBraceIndex === -1 || lastBraceIndex === -1 || firstBraceIndex >= lastBraceIndex) {
-      return '';
+    return '';
   }
-  
+
   return input.substring(firstBraceIndex, lastBraceIndex + 1);
 }
