@@ -43,7 +43,7 @@ function App() {
   switch (currentPage) {
     case pages.TMC:
       if (preventAccessOutsideOfRole(userRole, currentPage)) {
-        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
+        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} setStudentModule={setStudentModule} />;
       } else {
         localStorage.setItem("currentPage", pages.TMC);
         bodyContent = <TMCBody />;
@@ -51,20 +51,26 @@ function App() {
       break;
     case pages.Collab:
       if (preventAccessOutsideOfRole(userRole, currentPage)) {
-        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
+        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} setStudentModule={setStudentModule} />;
       } else {
         localStorage.setItem("currentPage", pages.Collab);
         bodyContent = <StudentBody studentModule={studentModule} setStudentModule={setStudentModule} collabSessionRef={collabSessionRef} leaveRef={leaveRef} />;
       }
       break;
-    default:
-      bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} />;
-      break;
+      default:
+        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} setStudentModule={setStudentModule} />;
+        break;
   }
 
   return (
     <div>
-      <Navbar setCurrentPage={setCurrentPage} setStudentModule={setStudentModule} cleanup={cleanup} />
+      <Navbar 
+        setCurrentPage={setCurrentPage} 
+        setStudentModule={setStudentModule} 
+        cleanup={cleanup} 
+        preventAccessWhenExpiredAuthToken={() => preventAccessWhenExpiredAuthToken()}
+        preventAccessOutsideOfRole={() => preventAccessOutsideOfRole(userRole, currentPage)} 
+      />
       {bodyContent}
     </div>
   );
@@ -82,30 +88,26 @@ function discoverStudentModule() {
   return localStorage.getItem("studentModule") || "";
 }
 
-/**
- * Prevents users lacking the correct role from accessing modules
- * 
- * @param {*} userRole 
- * @param {*} currentPage 
- * @returns true if access needs to be denied, false otherwise
- */
+async function preventAccessWhenExpiredAuthToken() {
+  const response = await fetch('/check-auth');
+  return !response.ok;
+}
+
 function preventAccessOutsideOfRole(userRole, currentPage) {
   if (userRole) {
     if ((userRole.includes("student")) && (currentPage === pages.TMC)) {
       localStorage.setItem("currentPage", pages.Default);
       return true;
-    }
-
-    if ((userRole.includes("teacher")) && (currentPage === pages.Collab)) {
+    } else if ((userRole.includes("teacher")) && (currentPage === pages.Collab)) {
       localStorage.setItem("currentPage", pages.Default);
       return true;
+    } else {
+      return false;
     }
-
-    return false
   } else {
     localStorage.setItem("currentPage", pages.Default);
     return true;
-  }
+}
 }
 
 export default App;

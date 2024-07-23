@@ -3,32 +3,37 @@ import pages from "./Pages";
 
 const uniteLogo = require("./unite-high-resolution-logo-transparent.png");
 
-function LoginBody({ setCurrentPage, setUserRole }) {
+function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
     async function authenticate() {
-        const authenticationResponse = await fetch("/login", {
-            method: "POST",
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            credentials: "include",
-            body: JSON.stringify({"username":username,"password":password})
-        });
-        const authenticationResult = await authenticationResponse.json();
+        try {
+            const authenticationResponse = await fetch("/login", {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                credentials: "include",
+                body: JSON.stringify({"username": username, "password": password})
+            });
+            const authenticationResult = await authenticationResponse.json();
 
-        if (authenticationResult.msg.includes("Success")) {
-            localStorage.setItem("username", authenticationResult.username)
-            localStorage.setItem("classRoomId", authenticationResult.classRoomId);
+            if (authenticationResult.msg.includes("Success")) {
+                localStorage.setItem("username", authenticationResult.username);
+                localStorage.setItem("classRoomId", authenticationResult.classRoomId);
 
-            if (authenticationResult.role.includes("student")) {
-                setUserRole("student");
-                setCurrentPage(pages.Collab);
-            } else {
-                setUserRole("teacher");
-                setCurrentPage(pages.TMC);
+                if (authenticationResult.role.includes("student")) {
+                    setUserRole("student");
+                    setCurrentPage(pages.Collab);
+                    setStudentModule("");
+                } else {
+                    setUserRole("teacher");
+                    setCurrentPage(pages.TMC);
+                }
             }
+        } catch (error) {
+            console.error("Error during authentication:", error);
         }
     }
 
@@ -44,7 +49,7 @@ function LoginBody({ setCurrentPage, setUserRole }) {
                         <input type="password" id="password" placeholder="Password" className="form-control" onChange={(ev) => setPassword(ev.target.value)} />
                     </div>
                 </form>
-                <button type="submit" id="login" onClick={authenticate} className="btn btn-lg btn-block btn-primary mx-auto">
+                <button type="button" id="login" onClick={authenticate} className="btn btn-lg btn-block btn-primary mx-auto">
                     Login
                 </button>
             </div>

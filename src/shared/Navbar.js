@@ -1,42 +1,54 @@
+import React from "react";
 import pages from "./Pages";
 
-function Navbar({ setCurrentPage, setStudentModule, cleanup }) {
+function Navbar({ setCurrentPage, setStudentModule, cleanup, preventAccessWhenExpiredAuthToken, preventAccessOutsideOfRole }) {
     return (
         <nav className="navbar navbar-expand-lg mb-4 mt-1 mx-1">
             <div className="container-fluid">
                 <span className="navbar-brand bold ms-3">Unite</span>
                 <ul className="navbar-nav me-3">
-                <NavItem 
-                    setCurrentPage={setCurrentPage} 
-                    navItemText="Students" 
-                    pageLink={pages.Collab} 
-                    setStudentModule={setStudentModule}
-                    cleanup={cleanup}
-                />
-                <NavItem 
-                    setCurrentPage={setCurrentPage} 
-                    navItemText="Teachers" 
-                    pageLink={pages.TMC}
-                    cleanup={cleanup}
-                />
-                <LogoutButton setCurrentPage={setCurrentPage} cleanup={cleanup} />
+                    <NavItem 
+                        setCurrentPage={setCurrentPage} 
+                        navItemText="Students" 
+                        pageLink={pages.Collab} 
+                        setStudentModule={setStudentModule}
+                        cleanup={cleanup}
+                        preventAccessWhenExpiredAuthToken={preventAccessWhenExpiredAuthToken}
+                        preventAccessOutsideOfRole={preventAccessOutsideOfRole}
+                    />
+                    <NavItem 
+                        setCurrentPage={setCurrentPage} 
+                        navItemText="Teachers" 
+                        pageLink={pages.TMC}
+                        cleanup={cleanup}
+                        preventAccessWhenExpiredAuthToken={preventAccessWhenExpiredAuthToken}
+                        preventAccessOutsideOfRole={preventAccessOutsideOfRole}
+                    />
+                    <LogoutButton setCurrentPage={setCurrentPage} cleanup={cleanup} />
                 </ul>        
             </div>
         </nav>
     );
 }
 
-function NavItem({ setCurrentPage, navItemText, pageLink, setStudentModule, cleanup }) {
-    function updateCurrentPage() {
+function NavItem({ setCurrentPage, navItemText, pageLink, setStudentModule, cleanup, preventAccessWhenExpiredAuthToken, preventAccessOutsideOfRole }) {
+    async function updateCurrentPage() {
         cleanup();
 
-        localStorage.setItem("currentPage", pageLink);
+        const isAuthTokenExpired = await preventAccessWhenExpiredAuthToken();
+        const isAccessOutsideRole = preventAccessOutsideOfRole();
 
-        if(localStorage.getItem("currentPage") === pages.Collab) {
-            setStudentModule("");
+        if (isAuthTokenExpired || isAccessOutsideRole) {
+            return;
+        } else {
+            localStorage.setItem("currentPage", pageLink);
+
+            if (pageLink === pages.Collab) {
+                setStudentModule("");
+            }
+            
+            setCurrentPage(pageLink);
         }
-        
-        setCurrentPage(pageLink);
     };
 
     return (
@@ -50,10 +62,12 @@ function LogoutButton({ setCurrentPage, cleanup }) {
     function updateCurrentPage() {
         cleanup();
 
-        localStorage.setItem("currentPage", pages.Default);
+        localStorage.removeItem("studentModule");
         localStorage.removeItem("username");
         localStorage.removeItem("userRole");
         localStorage.removeItem("classRoomId");
+
+        fetch('/logout');
         
         setCurrentPage(pages.Default);
     };
