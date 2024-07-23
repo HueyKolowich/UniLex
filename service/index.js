@@ -153,7 +153,7 @@ app.post('/prompts', async (req, res) => {
   try {
     const classRoomId = await DB.getClassRoomIdByToken(req.cookies[authCookieName]);
     if (!classRoomId) {
-      return res.status(401).json({ error: 'Invalid or missing authentication token' });
+      return res.status(400).json({ error: 'Invalid or missing authentication token' });
     }
 
     const { promptsList } = req.body;
