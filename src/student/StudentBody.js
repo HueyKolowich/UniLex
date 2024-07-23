@@ -2,13 +2,17 @@ import { useEffect, useState } from "react";
 import CalendarBody from "./CalendarBody";
 import CollabBody from "./Collab";
 
-function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveRef }) {
+function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveRef, bringBackToLogin }) {
     const [isMeetingEntryDisabled, setIsMeetingEntryDisabled] = useState(true);
 
     useEffect(() => {
         const checkForMeetings = async () => {
             try {
                 const response = await fetch("/current-meeting-scheduled");
+                if (response.status == 401) {
+                    bringBackToLogin();
+                }
+
                 const data = await response.json();
                 setIsMeetingEntryDisabled(!data.result);
             } catch (error) {
@@ -22,10 +26,10 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
     let bodyContent;
     switch (studentModule) {
         case "calendar":
-            bodyContent = <CalendarBody />;
+            bodyContent = <CalendarBody bringBackToLogin={bringBackToLogin} />;
             break;
         case "collab":
-            bodyContent = <CollabBody collabSessionRef={collabSessionRef} leaveRef={leaveRef} />;
+            bodyContent = <CollabBody collabSessionRef={collabSessionRef} leaveRef={leaveRef} bringBackToLogin={bringBackToLogin} />;
             break;
         default:
             bodyContent = 

@@ -7,8 +7,11 @@ import {
 } from "@videosdk.live/react-sdk";
 import ReactPlayer from "react-player";
 
-async function getVideoToken() {
+async function getVideoToken({ bringBackToLogin }) {
     const videoTokenResponse = await fetch('/generate-video-token');
+    if (videoTokenResponse.status === 401) {
+        bringBackToLogin();
+    }
     const videoToken = await videoTokenResponse.json();
 
     return videoToken.videoToken;

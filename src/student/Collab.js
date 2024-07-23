@@ -3,7 +3,7 @@ import CollabSession from './CollabSession.js';
 import { getVideoToken, VideoSDKMeetingProvider } from './Video.js';
 import webSocketMessageTypes from '../shared/WebSocketMessageTypes.js';
 
-function CollabBody({ collabSessionRef, leaveRef }) {
+function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
     const [collabSession, setCollabSession] = useState(null);
     const [meetingId, setMeetingId] = useState(null);
     const [videoToken, setVideoToken] = useState(null);
@@ -15,7 +15,7 @@ function CollabBody({ collabSessionRef, leaveRef }) {
     useEffect(() => {
         const initializeSession = async () => {
             try {
-                const vidToken = await getVideoToken();
+                const vidToken = await getVideoToken(bringBackToLogin);
                 setVideoToken(vidToken);
                 const session = new CollabSession(
                     localStorage.getItem("classRoomId"), 

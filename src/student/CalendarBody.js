@@ -11,7 +11,7 @@ import "../shared/CustomStyles.scss"
 
 const localizer = momentLocalizer(moment);
 
-function CalendarBody() {
+function CalendarBody({ bringBackToLogin }) {
   const [events, setEvents] = useState([]);
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
@@ -20,6 +20,10 @@ function CalendarBody() {
     const fetchEvents = async () => {
       try {
         const response = await fetch("/events");
+        if (response.status === 401) {
+          bringBackToLogin();
+        }
+
         const data = await response.json();
         setEvents(data.events);
       } catch (error) {

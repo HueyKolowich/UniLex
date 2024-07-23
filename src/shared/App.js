@@ -39,27 +39,54 @@ function App() {
     }
   };
 
+  const bringBackToLogin = () => {
+    cleanup();
+
+    localStorage.setItem("currentPage", pages.Default);
+    setCurrentPage(pages.Default);
+  };
+
   let bodyContent;
   switch (currentPage) {
     case pages.TMC:
       if (preventAccessOutsideOfRole(userRole, currentPage)) {
-        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} setStudentModule={setStudentModule} />;
+        bodyContent = <LoginBody 
+            setCurrentPage={setCurrentPage} 
+            setUserRole={setUserRole} 
+            setStudentModule={setStudentModule} 
+          />;
       } else {
         localStorage.setItem("currentPage", pages.TMC);
-        bodyContent = <TMCBody />;
+        bodyContent = <TMCBody 
+            bringBackToLogin={bringBackToLogin} 
+          />;
       }
       break;
     case pages.Collab:
       if (preventAccessOutsideOfRole(userRole, currentPage)) {
-        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} setStudentModule={setStudentModule} />;
+        bodyContent = <LoginBody 
+            setCurrentPage={setCurrentPage} 
+            setUserRole={setUserRole} 
+            setStudentModule={setStudentModule} 
+          />;
       } else {
         localStorage.setItem("currentPage", pages.Collab);
-        bodyContent = <StudentBody studentModule={studentModule} setStudentModule={setStudentModule} collabSessionRef={collabSessionRef} leaveRef={leaveRef} />;
+        bodyContent = <StudentBody 
+            studentModule={studentModule} 
+            setStudentModule={setStudentModule} 
+            collabSessionRef={collabSessionRef} 
+            leaveRef={leaveRef} 
+            bringBackToLogin={bringBackToLogin}
+          />;
       }
       break;
-      default:
-        bodyContent = <LoginBody setCurrentPage={setCurrentPage} setUserRole={setUserRole} setStudentModule={setStudentModule} />;
-        break;
+    default:
+      bodyContent = bodyContent = <LoginBody 
+          setCurrentPage={setCurrentPage} 
+          setUserRole={setUserRole} 
+          setStudentModule={setStudentModule} 
+        />;
+      break;
   }
 
   return (

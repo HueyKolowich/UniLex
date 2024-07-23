@@ -2,13 +2,18 @@ import { useState } from "react";
 
 import AssignmentConfigurationBody from "./AssignmentConfig";
 
-function TMCBody() {
+function TMCBody({ bringBackToLogin }) {
     const [isConfiguringAssignment, setIsConfiguringAssignment] = useState(false);
 
     return (
         <div>
             { 
-                isConfiguringAssignment ? <AssignmentConfigurationBody setIsConfiguringAssignment={setIsConfiguringAssignment}/> :
+                isConfiguringAssignment ? 
+                <AssignmentConfigurationBody 
+                    setIsConfiguringAssignment={setIsConfiguringAssignment}
+                    bringBackToLogin={bringBackToLogin}
+                /> 
+                :
                 <div className="container-fluid">
                     <div className="row my-3">
                     <div className="col mx-3">

@@ -1,14 +1,14 @@
 import { useState } from "react";
 
-function AssignmentConfigurationBody({ setIsConfiguringAssignment }) {
+function AssignmentConfigurationBody({ setIsConfiguringAssignment, bringBackToLogin }) {
     const [promptTaskCount, setPromptTaskCount] = useState(1);
 
     return (
         <div className="container-fluid">
             <form className="row g-3"> 
                 <PromptTaskCountSelector setPromptTaskCount={setPromptTaskCount} />
-                <PromptTaskFields numPromptTasks={promptTaskCount} />
-                <FinishedButton setIsConfiguringAssignment={setIsConfiguringAssignment} />
+                <PromptTaskFields numPromptTasks={promptTaskCount} bringBackToLogin={bringBackToLogin} />
+                <FinishedButton setIsConfiguringAssignment={setIsConfiguringAssignment} bringBackToLogin={bringBackToLogin} />
             </form>            
         </div>
     );
@@ -39,7 +39,7 @@ function PromptTaskCountSelector({ setPromptTaskCount }) {
     );
 }
 
-function PromptTaskFields({ numPromptTasks }) {
+function PromptTaskFields({ numPromptTasks, bringBackToLogin }) {
     const [promptTaskFieldValues, setPromptTaskFieldValues] = useState(Array(numPromptTasks).fill(""));
     const [actflLevel, setActflLevel] = useState("Advanced-High");
 
@@ -61,6 +61,9 @@ function PromptTaskFields({ numPromptTasks }) {
         try {
             const response = await fetch(`/prompts?promptLevel=${actflLevel}`);
             if (!response.ok) {
+                if (response.status === 401) {
+                    bringBackToLogin();
+                }
                 throw new Error(`Server error: ${response.statusText}`);
             }
 
@@ -123,7 +126,7 @@ function PromptTaskFields({ numPromptTasks }) {
     );
 }
 
-function FinishedButton({ setIsConfiguringAssignment }) {
+function FinishedButton({ setIsConfiguringAssignment, bringBackToLogin }) {
     async function finish() {
         try {
             const promptElements = document.getElementsByName("promptTask");
@@ -141,7 +144,11 @@ function FinishedButton({ setIsConfiguringAssignment }) {
             };
             const response = await fetch(`/prompts`, options);
             if (!response.ok) {
-                throw new Error(`Server error: ${response.statusText}`);
+                if (response.status === 401) {
+                    bringBackToLogin();
+                } else {
+                    throw new Error(`Server error: ${response.statusText}`);
+                }
             }
 
             setIsConfiguringAssignment(false);
