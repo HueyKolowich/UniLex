@@ -3,6 +3,7 @@ const uuid = require('uuid');
 const url = require('url');
 const fetch = require('node-fetch');
 const DB = require('./Database.js');
+const { sanitzeJSONResponseObjects } = require('./lib/SanitizeReponses.js');
 const OpenAI = require('openai');
 
 const openai = new OpenAI();
@@ -178,7 +179,10 @@ async function generatePromptHelps(prompt) {
         model: "gpt-3.5-turbo-1106"
     })
 
-    return completion.choices[0].message.content;
+    let helps = completion.choices[0].message.content;
+    helps = sanitzeJSONResponseObjects(helps);
+
+    return helps;
 }
 
 function logGroups() {

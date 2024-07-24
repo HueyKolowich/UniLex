@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const DB = require('./Database.js');
 const { webSocketHandler } = require('./WebSocketHandler.js');
+const { sanitzeJSONResponseObjects } = require('./lib/SanitizeReponses.js');
 const OpenAI = require('openai');
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -283,14 +284,3 @@ const server = app.listen(port, () => {
 });
 
 webSocketHandler(server);
-
-function sanitzeJSONResponseObjects(input) {
-  const firstBraceIndex = input.indexOf('{');
-  const lastBraceIndex = input.lastIndexOf('}');
-
-  if (firstBraceIndex === -1 || lastBraceIndex === -1 || firstBraceIndex >= lastBraceIndex) {
-    return '';
-  }
-
-  return input.substring(firstBraceIndex, lastBraceIndex + 1);
-}
