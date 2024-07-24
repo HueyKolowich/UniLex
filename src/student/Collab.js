@@ -119,8 +119,8 @@ function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, client
     return (
         <div>
             <div className="card my-5">
-                <div className="card-header">
-                    Discuss:
+                <div className="card-header text-center">
+                    <h5 className="my-1">Discuss the following together:</h5>
                 </div>
                 <div className="card-body text-center">
                     <DiscussionPromptText prompt={currentPrompt.prompt} />
