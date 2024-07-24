@@ -105,6 +105,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
 function PromptHelps({ promptHelps }) {
     return (
         <div className="card h-100 me-5">
+            <div className="card-header text-center">Suggestions</div>
             <div className="card-body text-center d-flex flex-column justify-content-center">
                 {promptHelps.map((help, index) => (
                     <p className="my-3" key={index}>{help}</p>
