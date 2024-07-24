@@ -17,7 +17,9 @@ function AssignmentConfigurationBody({ setIsConfiguringAssignment, bringBackToLo
 function PromptTaskCountSelector({ setPromptTaskCount }) {
     function handleChange(event) {
         const newTaskCount = parseInt(event.target.value);
-        setPromptTaskCount(newTaskCount);
+        if (!isNaN(newTaskCount) && newTaskCount > 0) {
+            setPromptTaskCount(newTaskCount);
+        }
     }
 
     return (
