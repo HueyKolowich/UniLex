@@ -1,15 +1,39 @@
 import { useState } from "react";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from "@mui/material";
 
 function AssignmentConfigurationBody({ setIsConfiguringAssignment, bringBackToLogin }) {
     const [promptTaskCount, setPromptTaskCount] = useState(1);
+    const [eventModalOpen, setEventModalOpen] = useState(false);
+
+    const returnToTMC = () => {
+        setEventModalOpen(false);
+        setIsConfiguringAssignment(false);
+    };
 
     return (
         <div className="container-fluid">
             <form className="row g-3"> 
                 <PromptTaskCountSelector setPromptTaskCount={setPromptTaskCount} />
                 <PromptTaskFields numPromptTasks={promptTaskCount} bringBackToLogin={bringBackToLogin} />
-                <FinishedButton setIsConfiguringAssignment={setIsConfiguringAssignment} bringBackToLogin={bringBackToLogin} />
-            </form>            
+                <FinishedButton 
+                    setIsConfiguringAssignment={setIsConfiguringAssignment} 
+                    bringBackToLogin={bringBackToLogin}
+                    setEventModalOpen={setEventModalOpen}
+                />
+            </form>
+
+            <Dialog open={eventModalOpen}>
+                <DialogContent>
+                <div className="text-center">
+                    <h3 style={{color: "#c751cb"}}>The prompts have successfuly been assigned to all students!</h3>
+                </div>
+                </DialogContent>
+                <DialogActions sx={{justifyContent: "center"}}>
+                <Button onClick={returnToTMC} style={{color: "#ce66d2"}}>
+                    Okay
+                </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }
@@ -128,7 +152,7 @@ function PromptTaskFields({ numPromptTasks, bringBackToLogin }) {
     );
 }
 
-function FinishedButton({ setIsConfiguringAssignment, bringBackToLogin }) {
+function FinishedButton({ setIsConfiguringAssignment, bringBackToLogin, setEventModalOpen }) {
     async function finish() {
         try {
             const promptElements = document.getElementsByName("promptTask");
@@ -153,7 +177,7 @@ function FinishedButton({ setIsConfiguringAssignment, bringBackToLogin }) {
                 }
             }
 
-            setIsConfiguringAssignment(false);
+            setEventModalOpen(true);
         } catch (error) {
             console.error("Error in finish function:", error);
             alert('An error occurred while saving prompts. Please try again.');
@@ -161,7 +185,7 @@ function FinishedButton({ setIsConfiguringAssignment, bringBackToLogin }) {
     }
 
     return (
-        <button type="button" className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="doneAssignmentConfigButton" onClick={finish}>Done</button>
+        <button type="button" className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="doneAssignmentConfigButton" onClick={finish}>Assign to students</button>
     );
 }
 
