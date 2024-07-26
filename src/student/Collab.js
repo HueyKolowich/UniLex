@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Countdown from 'react-countdown';
 import CollabSession from './CollabSession.js';
 import { getVideoToken, VideoSDKMeetingProvider } from './Video.js';
 import webSocketMessageTypes from '../shared/WebSocketMessageTypes.js';
@@ -54,7 +55,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
                 setMeetingId(messageObject.MeetingId);
                 break;
             case "GetPrompt":
-                setCurrentPrompt({ position: messageObject.newPromptPosition, prompt: messageObject.newPrompt });
+                setCurrentPrompt({ position: messageObject.newPromptPosition, prompt: messageObject.newPrompt.prompt, time: messageObject.newPrompt.time });
 
                 if (messageObject.promptHelps) {
                     const parsedPromptHelps = JSON.parse(messageObject.promptHelps);
@@ -116,16 +117,52 @@ function PromptHelps({ promptHelps }) {
 }
 
 function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, clientId }) {
+    const timeRenderer = ({ minutes, seconds, completed }) => {
+        return (
+            <span className="d-flex">
+                {completed ? (
+                    <h1>00:00</h1>
+                ) : (
+                    <>
+                        <h1>{minutes < 10 ? `0${minutes}` : minutes}</h1>
+                        <h1>:</h1>
+                        <h1>{seconds < 10 ? `0${seconds}` : seconds}</h1>
+                    </>
+                )}
+            </span>
+        );
+    };
+
     return (
         <div>
-            <div className="card my-5">
-                <div className="card-header text-center">
-                    <h5 className="my-1">Discuss the following together:</h5>
+            { currentPrompt.prompt ? (
+                <div className="d-flex my-5">
+                    <div className="card w-100">
+                        <div className="card-header text-center">
+                            <h5 className="my-1">Discuss the following together:</h5>
+                        </div>
+                        <div className="card-body text-center">
+                            <DiscussionPromptText prompt={currentPrompt.prompt} />
+                        </div>
+                    </div>
+                    <div className="d-flex justify-content-center align-items-center ms-5 me-4">
+                        <Countdown 
+                            date={Date.now() + currentPrompt.time}
+                            renderer={timeRenderer}
+                            overtime={true}
+                        />
+                    </div>
                 </div>
-                <div className="card-body text-center">
-                    <DiscussionPromptText prompt={currentPrompt.prompt} />
+            ) : (
+                <div className="card my-5">
+                    <div className="card-header text-center">
+                        <h5 className="my-1">Discuss the following together:</h5>
+                    </div>
+                    <div className="card-body text-center">
+                        <DiscussionPromptText prompt={currentPrompt.prompt} />
+                    </div>
                 </div>
-            </div>
+            )}
             <div className="d-flex justify-content-center">
                 <NextPromptButton
                     currentPromptPosition={currentPrompt.position}
