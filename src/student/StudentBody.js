@@ -9,7 +9,7 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
         const checkForMeetings = async () => {
             try {
                 const response = await fetch("/current-meeting-scheduled");
-                if (response.status == 401) {
+                if (response.status === 401) {
                     bringBackToLogin();
                 }
 
