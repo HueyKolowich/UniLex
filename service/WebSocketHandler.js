@@ -66,7 +66,7 @@ function webSocketHandler(server) {
                                     const newPrompt = await DB.getPrompt(otherClient.classRoomId, newPromptPosition);
 
                                     if (newPrompt) {
-                                        const promptHelps = await generatePromptHelps(newPrompt);
+                                        const promptHelps = await generatePromptHelps(newPrompt.prompt);
 
                                         group.forEach((c) => {
                                             c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPromptPosition": newPromptPosition, "newPrompt": newPrompt, "promptHelps": promptHelps }));
