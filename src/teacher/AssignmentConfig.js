@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Dialog, DialogActions, DialogContent, Button } from "@mui/material";
 
 function AssignmentConfigurationBody({ setIsConfiguringAssignment, bringBackToLogin }) {
     const [promptTaskCount, setPromptTaskCount] = useState(1);
@@ -15,8 +15,7 @@ function AssignmentConfigurationBody({ setIsConfiguringAssignment, bringBackToLo
             <form className="row g-3"> 
                 <PromptTaskCountSelector setPromptTaskCount={setPromptTaskCount} />
                 <PromptTaskFields numPromptTasks={promptTaskCount} bringBackToLogin={bringBackToLogin} />
-                <FinishedButton 
-                    setIsConfiguringAssignment={setIsConfiguringAssignment} 
+                <FinishedButton  
                     bringBackToLogin={bringBackToLogin}
                     setEventModalOpen={setEventModalOpen}
                 />
@@ -66,26 +65,31 @@ function PromptTaskCountSelector({ setPromptTaskCount }) {
 }
 
 function PromptTaskFields({ numPromptTasks, bringBackToLogin }) {
-    const [promptTaskFieldValues, setPromptTaskFieldValues] = useState(Array(numPromptTasks).fill(""));
-    const [actflLevel, setActflLevel] = useState("Advanced-High");
+    const [promptTaskFieldValues, setPromptTaskFieldValues] = useState([]);
 
-    const tasksIndexes = Array.from({ length: numPromptTasks }, (_, i) => i);
+    useEffect(() => {
+        setPromptTaskFieldValues(prevValues => {
+            const currentLength = prevValues.length;
+            if (currentLength >= numPromptTasks) {
+                return prevValues.slice(0, numPromptTasks);
+            } else {
+                const newValues = Array.from({ length: numPromptTasks - currentLength }, () => ({ prompt: "", filter: "", actflLevel: "Advanced-High" }));
+                return [...prevValues, ...newValues];
+            }
+        });
+    }, [numPromptTasks]);
 
     function handleChange(event, index) {
         const { name, value } = event.target;
 
-        if (name === "actflLevel") {
-            setActflLevel(value);
-        } else if (name === "promptTask") {
-            const newPromptTaskFieldValues = [...promptTaskFieldValues];
-            newPromptTaskFieldValues[index] = value;
-            setPromptTaskFieldValues(newPromptTaskFieldValues);
-        }
+        const newPromptTaskFieldValues = [...promptTaskFieldValues];
+        newPromptTaskFieldValues[index][name] = value;
+        setPromptTaskFieldValues(newPromptTaskFieldValues);
     }
 
     async function generate(index) {
         try {
-            const response = await fetch(`/prompts?promptLevel=${actflLevel}`);
+            const response = await fetch(`/prompts?promptLevel=${promptTaskFieldValues[index].actflLevel}&filter=${promptTaskFieldValues[index].filter}`);
             if (!response.ok) {
                 if (response.status === 401) {
                     bringBackToLogin();
@@ -94,9 +98,11 @@ function PromptTaskFields({ numPromptTasks, bringBackToLogin }) {
             }
 
             const promptObject = await response.json();
+            console.log(promptObject.prompt);
             const parsedPromptObject = JSON.parse(promptObject.prompt);
+            console.log(parsedPromptObject);
             const newPromptTaskFieldValues = [...promptTaskFieldValues];
-            newPromptTaskFieldValues[index] = parsedPromptObject.prompt;
+            newPromptTaskFieldValues[index].prompt = parsedPromptObject.prompt;
             setPromptTaskFieldValues(newPromptTaskFieldValues);
         } catch (error) {
             console.error("Error in generate function:", error);
@@ -106,43 +112,63 @@ function PromptTaskFields({ numPromptTasks, bringBackToLogin }) {
 
     return (
         <div className="col-12">
-            {tasksIndexes.map(index => (
+            {promptTaskFieldValues.map((_, index) => (
                 <div key={index}>
                     <div className="card mb-3">
                         <div className="mx-3 my-3">
                             <div className="row mb-3">
-                                <label className="form-label" htmlFor={`promptTaskKey${index}`}>Prompt #{index + 1}:</label>
+                                <label className="form-label ps-4" htmlFor={`promptTaskKey${index}`}>Prompt #{index + 1}:</label>
                                 <input 
                                     className="form-control" 
-                                    name="promptTask" 
+                                    name="prompt" 
                                     id={`promptTaskKey${index}`} 
                                     type="text" 
-                                    value={promptTaskFieldValues[index]}
+                                    value={promptTaskFieldValues[index].prompt}
                                     onChange={(e) => handleChange(e, index)}
                                 />
                             </div>
                             <div className="row pb-1">
-                                <div className="d-flex justify-content-end">
+                                <div className="d-flex justify-content-between">
                                     <select 
                                         className="form-select w-25 me-3" 
-                                        name="actflLevel" 
-                                        onChange={(e) => handleChange(e)}
+                                        name="time"
                                     >
-                                        <option selected disabled>ACTFL level</option>
-                                        <option value="Novice-Low">Novice-Low</option>
-                                        <option value="Novice-Mid">Novice-Mid</option>
-                                        <option value="Novice-High">Novice-High</option>
-                                        <option value="Intermediate-Low">Intermediate-Low</option>
-                                        <option value="Intermediate-Mid">Intermediate-Mid</option>
-                                        <option value="Intermediate-High">Intermediate-High</option>
-                                        <option value="Advanced-Low">Advanced-Low</option>
-                                        <option value="Advanced-Mid">Advanced-Mid</option>
-                                        <option value="Advanced-High">Advanced-High</option>
-                                        <option value="Superior">Superior</option>
-                                        <option value="Distinguished">Distinguished</option>
+                                        <option selected disabled value={300000}>Mininum time to spend on prompt</option>
+                                        <option value={180000}>3 minutes</option>
+                                        <option value={300000}>5 minutes</option>
+                                        <option value={420000}>7 minutes</option>
+                                        <option value={600000}>10 minutes</option>
                                     </select>
-                                    <button type="button" className="btn btn-lg btn-block btn-primary" onClick={() => generate(index)}>Generate</button>
-                                </div>                                
+                                    <div className="d-flex justify-content-end">
+                                        <input 
+                                            className="form-control me-3" 
+                                            name="filter" 
+                                            type="text"
+                                            placeholder="Prompt topic"
+                                            value={promptTaskFieldValues[index].filter}
+                                            onChange={(e) => handleChange(e, index)}
+                                        />
+                                        <select 
+                                            className="form-select w-75 me-3" 
+                                            name="actflLevel"
+                                            onChange={(e) => handleChange(e, index)}
+                                        >
+                                            <option selected disabled>ACTFL level</option>
+                                            <option value="Novice-Low">Novice-Low</option>
+                                            <option value="Novice-Mid">Novice-Mid</option>
+                                            <option value="Novice-High">Novice-High</option>
+                                            <option value="Intermediate-Low">Intermediate-Low</option>
+                                            <option value="Intermediate-Mid">Intermediate-Mid</option>
+                                            <option value="Intermediate-High">Intermediate-High</option>
+                                            <option value="Advanced-Low">Advanced-Low</option>
+                                            <option value="Advanced-Mid">Advanced-Mid</option>
+                                            <option value="Advanced-High">Advanced-High</option>
+                                            <option value="Superior">Superior</option>
+                                            <option value="Distinguished">Distinguished</option>
+                                        </select>
+                                        <button type="button" className="btn btn-lg btn-block btn-primary" onClick={() => generate(index)}>Generate</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -152,13 +178,18 @@ function PromptTaskFields({ numPromptTasks, bringBackToLogin }) {
     );
 }
 
-function FinishedButton({ setIsConfiguringAssignment, bringBackToLogin, setEventModalOpen }) {
+function FinishedButton({ bringBackToLogin, setEventModalOpen }) {
     async function finish() {
         try {
-            const promptElements = document.getElementsByName("promptTask");
+            const promptElements = document.getElementsByName("prompt");
+            const timeElements = document.getElementsByName("time");
+
             let promptsList = [];
             for (let i = 0; i < promptElements.length; i++) {
-                promptsList.push(promptElements[i].value);
+                const prompt = promptElements[i].value;
+                const time = Number(timeElements[i].value);
+
+                promptsList.push({prompt, time});
             }
 
             const options = {
