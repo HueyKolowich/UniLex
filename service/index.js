@@ -54,7 +54,7 @@ app.post('/login', async (req, res) => {
         httpOnly: true,
         maxAge: 9000000,
         secure: true,
-        sameSite: 'Strict', // Adding SameSite attribute for security
+        sameSite: 'Strict',
       });
       res.status(200).send({ msg: 'Success', role: user.role, username: user.username, classRoomId: user.classRoomId });
       return;
@@ -126,14 +126,14 @@ app.get('/prompts', async (req, res) => {
     const token = req.cookies[authCookieName];
     const user = await DB.getUserByToken(token);
 
-    const { promptLevel } = req.query;
+    const { promptLevel, filter } = req.query;
 
-    const formattedPrompt = "Generate a "
-      + user.target
-      + " discussion prompt based off the "
-      + promptLevel
-      + " ACTFL level."
-      + " Return just the prompt as a JSON object";
+    const formattedPrompt = 
+      "Generate a " + user.target + 
+      " discussion prompt based off the " + 
+      promptLevel + " ACTFL level. " +
+      (filter ? "The topic of the discussion prompt should be: " + filter + ". " : "") +
+      "Return just the prompt as a JSON object, the key should be called prompt.";
 
     const completion = await openai.chat.completions.create({
       messages: [{ role: "user", content: formattedPrompt }],
