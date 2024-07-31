@@ -3,7 +3,7 @@ const uuid = require('uuid');
 const url = require('url');
 const fetch = require('node-fetch');
 const DB = require('./Database.js');
-const { sanitzeJSONResponseObjects } = require('./lib/SanitizeReponses.js');
+const { sanitzeJSONResponseObjects } = require('./lib/SanitizeResponses.js');
 const OpenAI = require('openai');
 
 const openai = new OpenAI();
