@@ -8,7 +8,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
     const [collabSession, setCollabSession] = useState(null);
     const [meetingId, setMeetingId] = useState(null);
     const [videoToken, setVideoToken] = useState(null);
-    const [currentPrompt, setCurrentPrompt] = useState({ position: -1, prompt: '' });
+    const [currentPrompt, setCurrentPrompt] = useState({ prompt: '' });
     const [promptHelps, setPromptHelps] = useState(['\n', '\n', '\n', '\n', '\n']);
     const [clientWithLock, setClientWithLock] = useState(null);
     const [clientId, setClientId] = useState(null);
@@ -55,7 +55,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
                 setMeetingId(messageObject.MeetingId);
                 break;
             case "GetPrompt":
-                setCurrentPrompt({ position: messageObject.newPromptPosition, prompt: messageObject.newPrompt.prompt, time: messageObject.newPrompt.time });
+                setCurrentPrompt({ prompt: messageObject.newPrompt.prompt, time: messageObject.newPrompt.time });
 
                 if (messageObject.promptHelps) {
                     const parsedPromptHelps = JSON.parse(messageObject.promptHelps);
@@ -119,7 +119,7 @@ function PromptHelps({ promptHelps }) {
 function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, clientId }) {
     const timeRenderer = ({ minutes, seconds, completed }) => {
         return (
-            <span className="d-flex">
+            <span className="d-flex" style={{width: '100px'}}>
                 {completed ? (
                     <h1>00:00</h1>
                 ) : (
@@ -165,7 +165,6 @@ function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, client
             )}
             <div className="d-flex justify-content-center">
                 <NextPromptButton
-                    currentPromptPosition={currentPrompt.position}
                     collabSession={collabSession}
                     clientWithLock={clientWithLock}
                     clientId={clientId}
@@ -181,9 +180,9 @@ function DiscussionPromptText({ prompt }) {
     );
 }
 
-function NextPromptButton({ currentPromptPosition, collabSession, clientWithLock, clientId }) {
+function NextPromptButton({ collabSession, clientWithLock, clientId }) {
     const next = () => {
-        collabSession.send({ WebSocketRequestType: webSocketMessageTypes.GetPrompt, currentPromptPosition });
+        collabSession.send({ WebSocketRequestType: webSocketMessageTypes.GetPrompt });
     };
 
     return (
