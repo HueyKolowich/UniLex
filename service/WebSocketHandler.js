@@ -19,8 +19,9 @@ function webSocketHandler(server) {
         const { query } = url.parse(request.url, true);
         const classRoomId = query.classRoomId;
         const videoToken = query.videoToken;
+        const username = query.username;
 
-        if (!videoToken || !classRoomId) {
+        if (!videoToken || !classRoomId || !username) {
             socket.destroy();
             return;
         }
@@ -28,12 +29,13 @@ function webSocketHandler(server) {
         wss.handleUpgrade(request, socket, head, function done(ws) {
             ws.classRoomId = classRoomId;
             ws.videoToken = videoToken;
+            ws.username = username;
             wss.emit('connection', ws, request);
         });
     });
 
     wss.on('connection', async (ws) => {
-        const connection = { id: uuid.v4(), ws: ws, classRoomId: ws.classRoomId};
+        const connection = { id: uuid.v4(), ws: ws, classRoomId: ws.classRoomId, username: ws.username };
         await groupManager(connection, ws.videoToken);
 
         logGroups();
@@ -93,8 +95,10 @@ function webSocketHandler(server) {
                                     });
                                 } else {
                                     group.forEach((c) => {
-                                        c.ws.send(JSON.stringify({ "type": "GetPrompt", "newPrompt": "Finished/Terminado" }));
+                                        const otherConnection = Array.from(group).find(other => other.id !== c.id);
+
                                         c.ws.send(JSON.stringify({ "type": "UpdateLock", "clientWithLock": null }));
+                                        c.ws.send(JSON.stringify({ "type": "MeetingOver", "otherParticipantUsername": otherConnection.username }));
                                     });
                                 }
                             } catch (error) {

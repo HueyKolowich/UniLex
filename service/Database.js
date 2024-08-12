@@ -10,6 +10,9 @@ const userCollection = db.collection('user');
 const promptsCollection = db.collection('prompts');
 const eventsCollection = db.collection('events');
 const meetingsConfigCollection = db.collection('meetings-config');
+const submissionsCollection = db.collection('submissions');
+const classroomsCollection = db.collection('classrooms');
+const studentRatingsCollection = db.collection('student-ratings');
 
 function getUser(username) {
   return userCollection.findOne({ username: username });
@@ -239,6 +242,100 @@ async function setDesiredMeetingsCountForUser(username, meetingsCount) {
   }
 }
 
+async function getStudentSubmissions(username) {
+  try {
+    let result = await submissionsCollection.find({
+      username: username
+    }).toArray();
+
+    result = result.reverse();
+    return result;
+  } catch (error) {
+    console.error("Error fetching submissions:", error);
+    throw error;
+  }
+}
+
+async function setStudentSubmission(username, classRoomId, timestampOfMeetingAttendance, difficultiesSubmission, improvementSubmission, cultureSubmission, comfortableRating) {
+  try {
+    const filter = { 
+      username: username,
+      classRoomId: classRoomId,
+      attendedMeeting: timestampOfMeetingAttendance
+    };
+    const options = { upsert: true };
+    const updateDoc = {
+      $set: {
+        classRoomId: classRoomId,
+        username: username,
+        attendedMeeting: timestampOfMeetingAttendance,
+        difficultiesSubmission: difficultiesSubmission,
+        improvementSubmission: improvementSubmission,
+        cultureSubmission: cultureSubmission,
+        comfortableRating: comfortableRating
+      }
+    };
+
+    await submissionsCollection.updateOne(filter, updateDoc, options);
+  } catch (error) {
+    console.error("Error submitting student reflection response:", error);
+    throw error;
+  }
+}
+
+async function getLatestComfortRating(username) {
+  try {
+    const filter = { username: username };
+    const options = {
+      sort: { attendedMeeting: -1 },
+      projection: { comfortableRating: 1, attendedMeeting: 1 }
+    };
+
+    const latestSubmission = await submissionsCollection.findOne(filter, options);
+
+    if (latestSubmission) {
+      return latestSubmission.comfortableRating;
+    } else {
+      return "NA";
+    }
+  } catch (error) {
+    console.error("Error getting latest comfortRating:", error);
+    throw error;
+  }
+}
+
+
+async function setRatingForOtherStudent(username, rating) {
+  try {
+    const filter = {
+      username: username
+    };
+    const options = { upsert: true };
+    const updateDoc = {
+      $push: {
+        allRatings: rating
+      }
+    };
+
+    await studentRatingsCollection.updateOne(filter, updateDoc, options);
+  } catch (error) {
+    console.error("Error submitting student rating:", error);
+    throw error;
+  }
+}
+
+async function getStudentUsernamesByClassRoomId(classRoomId) {
+  try {
+    const filter = { classRoomId: classRoomId };
+    
+    const studentUsernames = await classroomsCollection.findOne(filter);
+
+    return studentUsernames.studentList;
+  } catch (error) {
+    console.error("Error setting getting student list for classroom:", error);
+    throw error;
+  }
+}
 
 module.exports = {
   getUser,
@@ -255,5 +352,10 @@ module.exports = {
   getBookedEvents,
   removeNameFromEventParticipantList,
   getDesiredMeetingsCountForUser,
-  setDesiredMeetingsCountForUser
+  setDesiredMeetingsCountForUser,
+  getStudentSubmissions,
+  setStudentSubmission,
+  getLatestComfortRating,
+  setRatingForOtherStudent, 
+  getStudentUsernamesByClassRoomId
 };

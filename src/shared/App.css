@@ -1,5 +1,7 @@
-*:focus {
-  box-shadow: 0 0 0 2px #f8e9f9 !important;
+*:focus,
+*:focus-visible {
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 tr {
@@ -16,6 +18,10 @@ h3 {
 }
 
 p,.DiscussionPromptText {
+  color: #ce66d2 !important;
+}
+
+.coloredHeader {
   color: #ce66d2 !important;
 }
 
@@ -87,9 +93,6 @@ table {
   color: #ce66d2 !important;
   border: var(--bs-border-width) solid #f1d3f2 !important;
 }
-.form-control:focus {
-  box-shadow: none !important;
-}
 
 .loginpagebody {
   height: 75vh !important;
@@ -130,7 +133,8 @@ table {
 
 #doneAssignmentConfigButton,
 #nextPromptButton,
-#JoinMeetingButton {
+#JoinMeetingButton,
+#submitReflectionButton {
   width: 25%;
 }
 
@@ -147,4 +151,46 @@ table {
 
 ::placeholder {
   color: #c751cb !important;
+}
+
+.rating-wrapper {
+  align-self: center;
+  display: inline-flex;
+  direction: rtl !important;
+  margin-left: auto;
+  
+  label {
+    color: #f1d3f2;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 3rem;
+    padding: 1rem .6rem;
+    transition: color 0.5s;
+  }
+  
+  .star-input,
+  .circle-input  {
+    display: none;
+  }
+
+  label:hover,
+  label:hover ~ label,
+  input:checked ~ label  {
+    color: #c751cb;
+  } 
+}
+
+.circle-rating-header {
+  color: #c751cb;
+}
+
+.reflectionFormTextField {
+  color: #c751cb !important;
+  border-color: #f1d3f2 !important;
+  border-radius: 7px !important;
+  padding: 5px !important;
+}
+
+.hinticon {
+  color: #c751cb;
 }

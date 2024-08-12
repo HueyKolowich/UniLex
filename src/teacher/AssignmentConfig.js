@@ -3,10 +3,10 @@ import { Dialog, DialogActions, DialogContent, Button } from "@mui/material";
 
 function AssignmentConfigurationBody({ setIsConfiguringAssignment, bringBackToLogin }) {
     const [promptTaskCount, setPromptTaskCount] = useState(1);
-    const [eventModalOpen, setEventModalOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
 
     const returnToTMC = () => {
-        setEventModalOpen(false);
+        setModalOpen(false);
         setIsConfiguringAssignment(false);
     };
 
@@ -17,11 +17,11 @@ function AssignmentConfigurationBody({ setIsConfiguringAssignment, bringBackToLo
                 <PromptTaskFields numPromptTasks={promptTaskCount} bringBackToLogin={bringBackToLogin} />
                 <FinishedButton  
                     bringBackToLogin={bringBackToLogin}
-                    setEventModalOpen={setEventModalOpen}
+                    setModalOpen={setModalOpen}
                 />
             </form>
 
-            <Dialog open={eventModalOpen}>
+            <Dialog open={modalOpen}>
                 <DialogContent>
                 <div className="text-center">
                     <h3 style={{color: "#c751cb"}}>The prompts have successfuly been assigned to all students!</h3>
@@ -178,7 +178,7 @@ function PromptTaskFields({ numPromptTasks, bringBackToLogin }) {
     );
 }
 
-function FinishedButton({ bringBackToLogin, setEventModalOpen }) {
+function FinishedButton({ bringBackToLogin, setModalOpen }) {
     async function finish() {
         try {
             const promptElements = document.getElementsByName("prompt");
@@ -208,7 +208,7 @@ function FinishedButton({ bringBackToLogin, setEventModalOpen }) {
                 }
             }
 
-            setEventModalOpen(true);
+            setModalOpen(true);
         } catch (error) {
             console.error("Error in finish function:", error);
             alert('An error occurred while saving prompts. Please try again.');

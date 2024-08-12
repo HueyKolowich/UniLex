@@ -279,6 +279,93 @@ app.post('/meetingcount', async (req, res) => {
   }
 });
 
+app.get('/submissions', async (req, res) => {
+  const username = req.query.username;
+
+  try {
+      let submissions = [];
+      if (username) {
+        submissions = await DB.getStudentSubmissions(username);
+
+        res.status(200).json({ submissions: submissions });
+      } else {
+        res.status(400).json({ error: "An error occurred while getting the submissions for the user, no specified username in request" });
+      }
+  } catch (error) {
+    console.error("Error in getting the submissions for user:", error);
+    res.status(500).json({ error: "An error occurred while getting the submissions for the user" });
+  }
+});
+
+app.post('/submissions', async (req, res) => {
+  const { difficultiesSubmission, improvementSubmission, cultureSubmission, otherStudentRating, otherStudentUsername, comfortableRating } = req.body;
+
+  try {
+    const token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    await DB.setStudentSubmission(
+      user.username, 
+      user.classRoomId, 
+      new Date(), 
+      difficultiesSubmission, 
+      improvementSubmission, 
+      cultureSubmission, 
+      comfortableRating
+    );
+
+    await DB.setRatingForOtherStudent(otherStudentUsername, otherStudentRating);
+
+    res.status(200).json({ msg: "Success" });
+  } catch (error) {
+    console.error("Error uploading student submission:", error);
+    res.status(500).json({ error: "An error occurred while uploading the student submission" });
+  }
+});
+
+app.get('/student-list', async (req, res) => {
+  try {
+    const token = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(token);
+
+    const studentUsernameList = await DB.getStudentUsernamesByClassRoomId(user.classRoomId);
+
+    const studentListPromises = studentUsernameList.map(async (username) => {
+      const student = await DB.getUser(username);
+      if (student) {
+        return { username: student.username, firstname: student.firstname, lastname: student.lastname };
+      }
+      return null;
+    });
+
+    let studentList = await Promise.all(studentListPromises);
+    studentList = studentList.filter((student) => student !== null);
+
+    res.status(200).json({ studentList: studentList });
+  } catch (error) {
+    console.error("Error in getting student list: ", error);
+    res.status(500).json({ error: "An error occurred while getting the list of students for this classroom" });
+  }
+});
+
+app.get('/comfortRating', async (req, res) => {
+  const username = req.query.username;
+
+  try {
+      let rating;
+      if (username) {
+        rating = await DB.getLatestComfortRating(username);
+
+        res.status(200).json({ rating: rating });
+      } else {
+        res.status(400).json({ error: "An error occurred while getting the comfortRating for the user, no specified username in request" });
+      }
+  } catch (error) {
+    console.error("Error in getting the comfortRating for user:", error);
+    res.status(500).json({ error: "An error occurred while getting the comfortRating for the user" });
+  }
+});
+
 const server = app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });

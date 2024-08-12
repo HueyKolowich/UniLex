@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import AssignmentConfigurationBody from "./AssignmentConfig";
+import StudentRecord from "./StudentRecord";
 
 function TMCBody({ bringBackToLogin }) {
     const [isConfiguringAssignment, setIsConfiguringAssignment] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [studentData, setStudentData] = useState([]);
 
     return (
         <div>
@@ -16,14 +20,26 @@ function TMCBody({ bringBackToLogin }) {
                 :
                 <div className="container-fluid">
                     <div className="row my-3">
-                    <div className="col mx-3">
-                        <Table />
+                        <div className="col mx-3">
+                            <Table 
+                                bringBackToLogin={bringBackToLogin} 
+                                setSelectedStudent={setSelectedStudent}
+                                setModalOpen={setModalOpen}
+                                setStudentData={setStudentData}
+                            />
+                        </div>
+                        <div className="col mx-5">
+                            <AssignmentOption setIsConfiguringAssignment={setIsConfiguringAssignment} />
+                            <ClassroomCodeCard />
+                        </div>
                     </div>
-                    <div className="col mx-5">
-                        <AssignmentOption setIsConfiguringAssignment={setIsConfiguringAssignment} />
-                        <ClassroomCodeCard />
-                    </div>
-                    </div>
+
+                    <StudentRecord
+                        modalOpen={modalOpen}
+                        setModalOpen={setModalOpen}
+                        selectedStudent={selectedStudent}
+                        studentData={studentData}
+                    />
                 </div>
             }
         </div>
@@ -84,12 +100,44 @@ function CardHeader({text}) {
     );
 }
 
-function Table() {
+function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentData }) {
+    const [studentList, setStudentList] = useState([]);
+
+    useEffect(() => {
+        const getStudentList = async () => {
+            try {
+                const response = await fetch("/student-list");
+                if (response.status === 401) {
+                    bringBackToLogin();
+                }
+
+                const data = await response.json();
+                setStudentList(data.studentList);
+            } catch (error) {
+                console.error("Error checking if there is a current meeting scheduled:", error);
+            }
+        };
+
+        getStudentList();
+    }, []);
+
+
     return (
         <div className="panel">
             <table className="table table-borderless">
                 <TableHead />
-                <TableBodyItem />
+                <tbody>
+                    { studentList.map((student, index) => (
+                        <TableBodyItem 
+                            key={index} 
+                            index={index} 
+                            student={student} 
+                            setSelectedStudent={setSelectedStudent}
+                            setModalOpen={setModalOpen}
+                            setStudentData={setStudentData}
+                        />
+                    )) }
+                </tbody>
             </table>
         </div>
     );
@@ -102,80 +150,51 @@ function TableHead() {
                 <th scope="col">#</th>
                 <th scope="col">First</th>
                 <th scope="col">Last</th>
-                <th scope="col">Status</th>
-                <th scope="col">Performance</th>
+                <th scope="col">Comfort Level</th>
             </tr>
         </thead>
     );
 }
 
-function TableBodyItem() {
+function TableBodyItem({ index, student, setSelectedStudent, setModalOpen, setStudentData }) {
+    const [comfortableRating, setComfortableRating] = useState("");
+
+    const bringUpStudentData = async (student) => {
+        try {
+            const response = await fetch(`/submissions?username=${student.username}`);
+
+            const data = await response.json();
+            setStudentData(data.submissions);
+        } catch (error) {
+            console.error("Error fetching data for the selected student:", error);
+        }
+
+        setSelectedStudent(student);
+        setModalOpen(true);
+    };
+
+    useEffect(() => {
+        const getMostRecentComfortableScore = async (student) => {
+            try {
+                const response = await fetch(`/comfortRating?username=${student.username}`);
+    
+                const data = await response.json();
+                setComfortableRating(data.rating);
+            } catch (error) {
+                console.error("Error fetching data for the selected student:", error);
+            }
+        };
+
+        getMostRecentComfortableScore(student);
+    }, [student]);
+
     return (
-        <tbody>
-            <tr className="rowItem">
-                <th scope="row">1</th>
-                <td>Johnny</td>
-                <td>Appleseed</td>
-                <td>Active</td>
-                <td>87%</td>
-            </tr>
-            <tr className="rowItem">
-                <th scope="row">2</th>
-                <td>John</td>
-                <td>Doe</td>
-                <td>Active</td>
-                <td>64%</td>
-            </tr>
-            <tr className="rowItem">
-                <th scope="row">3</th>
-                <td>Jane</td>
-                <td>Smith</td>
-                <td>Inactive</td>
-                <td>93%</td>
-            </tr>
-            <tr className="rowItem">
-                <th scope="row">4</th>
-                <td>Tommy</td>
-                <td>Johnson</td>
-                <td>Inactive</td>
-                <td>79%</td>
-            </tr>
-            <tr className="rowItem">
-                <th scope="row">5</th>
-                <td>Mia</td>
-                <td>Rodriguez</td>
-                <td>Active</td>
-                <td>88%</td>
-            </tr>
-            <tr className="rowItem">
-                <th scope="row">6</th>
-                <td>Liam</td>
-                <td>Patel</td>
-                <td>Inactive</td>
-                <td>63%</td>
-            </tr>
-            <tr className="rowItem">
-                <th scope="row">7</th>
-                <td>Sophie</td>
-                <td>Lee</td>
-                <td>Inactive</td>
-                <td>71%</td>
-            </tr>
-            <tr className="rowItem">
-                <th scope="row">8</th>
-                <td>Ethan</td>
-                <td>Smith</td>
-                <td>Inactive</td>
-                <td>96%</td>
-            </tr>
-            <tr className="rowItem">
-                <th scope="row">9</th>
-                <td>Olivia</td>
-                <td>Brown</td>
-                <td>Inactive</td>
-                <td>78%</td>
-            </tr>
-        </tbody>
+        <tr className="rowItem" onClick={() => bringUpStudentData(student)}>
+            <th scope="row">{index + 1}</th>
+            <td>{student.firstname}</td>
+            <td>{student.lastname}</td>
+            <td>{comfortableRating}</td>
+        </tr>
     );
 }
 

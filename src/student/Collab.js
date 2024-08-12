@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Countdown from 'react-countdown';
 import CollabSession from './CollabSession.js';
+import ReflectionForm from './ReflectionForm.js';
 import { getVideoToken, VideoSDKMeetingProvider } from './Video.js';
 import webSocketMessageTypes from '../shared/WebSocketMessageTypes.js';
 
@@ -12,6 +13,8 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
     const [promptHelps, setPromptHelps] = useState(['\n', '\n', '\n', '\n', '\n']);
     const [clientWithLock, setClientWithLock] = useState(null);
     const [clientId, setClientId] = useState(null);
+    const [meetingOver, setMeetingOver] = useState(false);
+    const [otherParticipantUsername, setOtherParticipantUsername] = useState("");
 
     useEffect(() => {
         const initializeSession = async () => {
@@ -21,6 +24,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
                 const session = new CollabSession(
                     localStorage.getItem("classRoomId"), 
                     vidToken, 
+                    localStorage.getItem("username"),
                     (message) => handleWebSocketMessage(message)
                 );
                 collabSessionRef.current = session;
@@ -70,40 +74,59 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
             case "ClientId":
                 setClientId(messageObject.clientId);
                 break;
+            case "MeetingOver":
+                setOtherParticipantUsername(messageObject.otherParticipantUsername);
+                setMeetingOver(true);
+
+                if (collabSession && collabSession.socket) {
+                    collabSession.socket.close();
+                }
+
+                if (leaveRef.current) {
+                    leaveRef.current();
+                  }
+                break;
             default:
                 console.warn('Unhandled message type:', messageObject.type);
         }
     };
 
     return (
-        <div>
-            {meetingId ? (
-                <div className="container-fluid">
-                    <div className="row mt-5 d-flex justify-content-between align-items-stretch">
-                        <div className="col-md-9">
-                            <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} leaveRef={leaveRef} />
+        meetingOver ? (
+            <div>
+                <ReflectionForm otherStudentUsername={otherParticipantUsername} />
+            </div>
+        ) : (
+            <div>
+                { meetingId ? (
+                    <div className="container-fluid">
+                        <div className="row mt-5 d-flex justify-content-between align-items-stretch">
+                            <div className="col-md-9">
+                                <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} leaveRef={leaveRef} />
+                            </div>
+                            <div className="col-md-3">
+                                <PromptHelps promptHelps={promptHelps} />
+                            </div>
                         </div>
-                        <div className="col-md-3">
-                            <PromptHelps promptHelps={promptHelps} />
-                        </div>
+                        <DiscussionPrompt
+                            currentPrompt={currentPrompt}
+                            collabSession={collabSession}
+                            clientWithLock={clientWithLock}
+                            clientId={clientId}
+                        />
                     </div>
-                    <DiscussionPrompt
-                        currentPrompt={currentPrompt}
-                        collabSession={collabSession}
-                        clientWithLock={clientWithLock}
-                        clientId={clientId}
-                    />
-                </div>
-            ) : (
-                <div className="d-flex justify-content-center align-items-center">
-                    <div className="spinner-border" role="status" />
-                </div>
-            )}
-        </div>
+                ) : (
+                    <div className="d-flex justify-content-center align-items-center">
+                        <div className="spinner-border" role="status" />
+                    </div>
+                )}
+            </div>
+        )
     );
 }
 
 function PromptHelps({ promptHelps }) {
+    try {
     return (
         <div className="card h-100 me-5">
             <div className="card-header text-center">Suggestions</div>
@@ -114,6 +137,16 @@ function PromptHelps({ promptHelps }) {
             </div>
         </div>
     );
+    } catch (error) {
+        return (
+            <div className="card h-100 me-5">
+            <div className="card-header text-center">Suggestions</div>
+            <div className="card-body text-center d-flex flex-column justify-content-center">
+                <p className="my-3">No hints available</p>
+            </div>
+        </div>
+        );
+    }
 }
 
 function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, clientId }) {
