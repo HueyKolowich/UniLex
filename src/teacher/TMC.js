@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import AssignmentConfigurationBody from "./AssignmentConfig";
 import StudentRecord from "./StudentRecord";
+import formatGMTDate from "./FormatGMTDate";
 
 function TMCBody({ bringBackToLogin }) {
     const [isConfiguringAssignment, setIsConfiguringAssignment] = useState(false);
@@ -174,7 +175,7 @@ function TableHead() {
 }
 
 function TableBodyItem({ index, student, setSelectedStudent, setModalOpen, setStudentData }) {
-    const [comfortableRating, setComfortableRating] = useState("");
+    const [studentTableInfo, setStudentTableInfo] = useState({ rating: "", recent: "", score: "" });
 
     const bringUpStudentData = async (student) => {
         try {
@@ -191,18 +192,18 @@ function TableBodyItem({ index, student, setSelectedStudent, setModalOpen, setSt
     };
 
     useEffect(() => {
-        const getMostRecentComfortableScore = async (student) => {
+        const getStudentTableInfo = async (student) => {
             try {
-                const response = await fetch(`/comfortRating?username=${student.username}`);
+                const response = await fetch(`/student-table-info?username=${student.username}`);
     
                 const data = await response.json();
-                setComfortableRating(data.rating);
+                setStudentTableInfo({ rating: data.rating, recent: data.recent, score: data.score });
             } catch (error) {
-                console.error("Error fetching data for the selected student:", error);
+                console.error("Error fetching table data for the selected student:", error);
             }
         };
 
-        getMostRecentComfortableScore(student);
+        getStudentTableInfo(student);
     }, [student]);
 
     return (
@@ -210,9 +211,9 @@ function TableBodyItem({ index, student, setSelectedStudent, setModalOpen, setSt
             <th scope="row">{index + 1}</th>
             <td>{student.firstname}</td>
             <td>{student.lastname}</td>
-            <td>{comfortableRating}</td>
-            <td>5</td>
-            <td>01/10/1990</td>
+            <td>{studentTableInfo.rating}</td>
+            <td>{studentTableInfo.score}</td>
+            <td>{formatGMTDate(studentTableInfo.recent).date}</td>
         </tr>
     );
 }

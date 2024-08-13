@@ -323,7 +323,7 @@ async function setStudentSubmission(username, classRoomId, timestampOfMeetingAtt
   }
 }
 
-async function getLatestComfortRating(username) {
+async function getLatestMeetingDateAndRating(username) {
   try {
     const filter = { username: username };
     const options = {
@@ -334,16 +334,37 @@ async function getLatestComfortRating(username) {
     const latestSubmission = await submissionsCollection.findOne(filter, options);
 
     if (latestSubmission) {
-      return latestSubmission.comfortableRating;
+      return { rating: latestSubmission.comfortableRating, recent: latestSubmission.attendedMeeting };
     } else {
-      return "NA";
+      return { rating: "NA", recent: "NA" };
     }
   } catch (error) {
-    console.error("Error getting latest comfortRating:", error);
+    console.error("Error getting latest meeting date and rating:", error);
     throw error;
   }
 }
 
+async function getAverageHelpfulnessScore(username) {
+  try {
+    const filter = { username: username };
+    const options = {
+      projection: { allRatings: 1 }
+    };
+
+    const allRatings = await studentRatingsCollection.findOne(filter, options);
+
+    if (allRatings) {
+      const ratingAvg = ratings => ratings.reduce((a, b) => a + b) / ratings.length;
+
+      return ratingAvg(allRatings.allRatings);
+    } else {
+      return "NA";
+    }
+  } catch (error) {
+    console.error("Error getting latest meeting date and rating:", error);
+    throw error;
+  }
+}
 
 async function setRatingForOtherStudent(username, rating) {
   try {
@@ -413,7 +434,8 @@ module.exports = {
   setDesiredMeetingsCountForUser,
   getStudentSubmissions,
   setStudentSubmission,
-  getLatestComfortRating,
+  getLatestMeetingDateAndRating,
+  getAverageHelpfulnessScore,
   setRatingForOtherStudent, 
   getStudentUsernamesByClassRoomId,
   getClassInfo

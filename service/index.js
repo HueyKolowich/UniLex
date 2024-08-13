@@ -387,15 +387,16 @@ app.get('/student-list', async (req, res) => {
   }
 });
 
-app.get('/comfortRating', async (req, res) => {
+app.get('/student-table-info', async (req, res) => {
   const username = req.query.username;
 
   try {
-      let rating;
+      let rating, recent, score;
       if (username) {
-        rating = await DB.getLatestComfortRating(username);
+        ({ rating, recent } = await DB.getLatestMeetingDateAndRating(username));
+        score = await DB.getAverageHelpfulnessScore(username);
 
-        res.status(200).json({ rating: rating });
+        res.status(200).json({ rating: rating, recent: recent, score: score });
       } else {
         res.status(400).json({ error: "An error occurred while getting the comfortRating for the user, no specified username in request" });
       }
