@@ -1,4 +1,4 @@
-function ReflectionForm({ otherStudentUsername }) {
+function ReflectionForm({ otherStudentUsername, setStudentModule }) {
     return(
         <div className="card">
             <div className="container d-flex my-4">
@@ -78,12 +78,12 @@ function ReflectionForm({ otherStudentUsername }) {
             <textarea className="reflectionFormTextField mb-3 mx-3" id="improvementSubmission" placeholder="Based on this most recent conversation, what would you like to improve on:" rows={2} />
             <textarea className="reflectionFormTextField mb-3 mx-3" id="cultureSubmission" placeholder="Describe what you learned about your partner's language and culture during this week's conversation:" rows={2} />
             
-            <SumbitButton otherStudentUsername={otherStudentUsername} />
+            <SumbitButton otherStudentUsername={otherStudentUsername} setStudentModule={setStudentModule} />
         </div>
     );
 }
 
-function SumbitButton({ otherStudentUsername }) {
+function SumbitButton({ otherStudentUsername, setStudentModule }) {
     async function submit() {
         try {
             const difficultiesSubmission = document.getElementById("difficultiesSubmission").value;
@@ -124,7 +124,8 @@ function SumbitButton({ otherStudentUsername }) {
                 throw new Error(`Server error: ${response.statusText}`);
             }
 
-            //TODO here we will need to return to the studentBody homepage
+            window.alert("Submission successful!");
+            setStudentModule("");
         } catch (error) {
             console.error("Error in submit action:", error);
             alert('An error occurred while submitting your response. Please try again.');

@@ -5,7 +5,7 @@ import ReflectionForm from './ReflectionForm.js';
 import { getVideoToken, VideoSDKMeetingProvider } from './Video.js';
 import webSocketMessageTypes from '../shared/WebSocketMessageTypes.js';
 
-function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
+function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentModule }) {
     const [collabSession, setCollabSession] = useState(null);
     const [meetingId, setMeetingId] = useState(null);
     const [videoToken, setVideoToken] = useState(null);
@@ -78,9 +78,9 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
                 setOtherParticipantUsername(messageObject.otherParticipantUsername);
                 setMeetingOver(true);
 
-                if (collabSession && collabSession.socket) {
-                    collabSession.socket.close();
-                }
+                if (collabSessionRef.current && collabSessionRef.current.socket) {
+                    collabSessionRef.current.socket.close();
+                  }
 
                 if (leaveRef.current) {
                     leaveRef.current();
@@ -94,7 +94,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin }) {
     return (
         meetingOver ? (
             <div>
-                <ReflectionForm otherStudentUsername={otherParticipantUsername} />
+                <ReflectionForm otherStudentUsername={otherParticipantUsername} setStudentModule={setStudentModule} />
             </div>
         ) : (
             <div>

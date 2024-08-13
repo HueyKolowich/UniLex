@@ -29,7 +29,12 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
             bodyContent = <CalendarBody bringBackToLogin={bringBackToLogin} />;
             break;
         case "collab":
-            bodyContent = <CollabBody collabSessionRef={collabSessionRef} leaveRef={leaveRef} bringBackToLogin={bringBackToLogin} />;
+            bodyContent = <CollabBody 
+                collabSessionRef={collabSessionRef} 
+                leaveRef={leaveRef} 
+                bringBackToLogin={bringBackToLogin}
+                setStudentModule={setStudentModule}
+                />;
             break;
         default:
             bodyContent = 
