@@ -160,6 +160,27 @@ app.get('/current-meeting-scheduled', async (req, res) => {
   }
 });
 
+app.get('/class-assignment', async (req, res) => {
+  const { classRoomId } = req.query;
+
+  if (!classRoomId) {
+    return res.status(400).json({ error: "classRoomId is required" });
+  }
+
+  try {
+    const prompts = await DB.getAllPrompts(classRoomId);
+
+    if (!prompts || prompts.length === 0) {
+      res.status(200).json({ prompts: [{ prompt: "No prompts have been assigned to this class", time: 0 }] });
+    } else {
+      res.status(200).json({ prompts });
+    }
+  } catch (error) {
+    console.error("Error getting all prompts for class", error);
+    res.status(500).json({ error: "An error occurred getting prompts for the specified class" });
+  }
+});
+
 app.get('/prompts', async (req, res) => {
   try {
     const token = req.cookies[authCookieName];

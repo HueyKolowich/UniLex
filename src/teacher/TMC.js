@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 
 import AssignmentConfigurationBody from "./AssignmentConfig";
+import AssignmentView from "./AssignmentView";
 import StudentRecord from "./StudentRecord";
 import formatGMTDate from "./FormatGMTDate";
 
 function TMCBody({ bringBackToLogin }) {
     const [isConfiguringAssignment, setIsConfiguringAssignment] = useState(false);
+    const [isViewingAssignment, setIsViewingAssignment] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [studentData, setStudentData] = useState([]);
@@ -18,6 +20,8 @@ function TMCBody({ bringBackToLogin }) {
                     setIsConfiguringAssignment={setIsConfiguringAssignment}
                     bringBackToLogin={bringBackToLogin}
                 /> 
+                : isViewingAssignment ?
+                <AssignmentView />
                 :
                 <div className="container-fluid">
                     <div className="row my-3">
@@ -30,7 +34,7 @@ function TMCBody({ bringBackToLogin }) {
                             />
                         </div>
                         <div className="col mx-5">
-                            <AssignmentOption setIsConfiguringAssignment={setIsConfiguringAssignment} />
+                            <AssignmentOption setIsConfiguringAssignment={setIsConfiguringAssignment} setIsViewingAssignment={setIsViewingAssignment} />
                             <ClassroomCodeCard />
                         </div>
                     </div>
@@ -47,32 +51,37 @@ function TMCBody({ bringBackToLogin }) {
     );
 }
   
-function AssignmentOption({ setIsConfiguringAssignment }) {
+function AssignmentOption({ setIsConfiguringAssignment, setIsViewingAssignment }) {
     const headerText = "Assignment Configuration";
 
     return (
         <div className="card text-center mb-4">
             <CardHeader text={headerText} />
-            <AssignmentOptionBody setIsConfiguringAssignment={setIsConfiguringAssignment} />      
+            <AssignmentOptionBody setIsConfiguringAssignment={setIsConfiguringAssignment} setIsViewingAssignment={setIsViewingAssignment} />      
         </div>
     );
 }
 
-function AssignmentOptionBody({ setIsConfiguringAssignment }) {
+function AssignmentOptionBody({ setIsConfiguringAssignment, setIsViewingAssignment }) {
     function startNewAssignment() {
         setIsConfiguringAssignment(true);
     }
 
+    function viewCurrentAssignment() {
+        setIsViewingAssignment(true);
+    }
+
     return (
         <div className="card-body">
-            <AssignmentOptionBodyButton startNewAssignment={startNewAssignment} />
+            <AssignmentOptionBodyButton handler={startNewAssignment} buttonText={"New Assignment"} />
+            <AssignmentOptionBodyButton handler={viewCurrentAssignment} buttonText={"View Assignment"}/>
         </div>
     );
 }
 
-function AssignmentOptionBodyButton({ startNewAssignment }) {
+function AssignmentOptionBodyButton({ handler, buttonText }) {
     return (
-        <button type="button" className="btn btn-lg btn-block btn-primary" onClick={startNewAssignment}>New Assignment</button>
+        <button type="button" className="btn btn-lg btn-block btn-primary mx-4" onClick={handler}>{buttonText}</button>
     );
 }
 
@@ -80,7 +89,7 @@ function ClassroomCodeCard() {
     const headerText = "My Classroom Code";
 
     return (
-        <div className="card text-center">
+        <div className="card text-center mb-4">
             <CardHeader text={headerText} />
             <ClassroomCodeCardBody />
         </div>

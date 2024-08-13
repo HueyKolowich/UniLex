@@ -106,6 +106,22 @@ async function addPrompts(classRoomId, promptsList) {
   await promptsCollection.updateOne(filter, updateDoc, options);
 }
 
+async function getAllPrompts(classRoomId) {
+  try {
+    const result = await promptsCollection.findOne({ classRoomId });
+
+    if (result && Array.isArray(result.promptsList)) {
+      return result.promptsList;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching prompts from database", error);
+    return [];
+  }
+}
+
+
 async function getPrompt(classRoomId, position) {
   const result = await promptsCollection.findOne(
     { classRoomId: classRoomId },
@@ -423,6 +439,7 @@ module.exports = {
   addUserToClassroom,
   generateNewSessionAuthToken,
   addPrompts,
+  getAllPrompts,
   getPrompt,
   getEvents,
   deleteEvent,
