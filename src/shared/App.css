@@ -138,6 +138,10 @@ table {
   width: 25%;
 }
 
+#registrationButton {
+  color: #c751cb !important;
+}
+
 #scores-table {
   width: 75% !important;
 }
