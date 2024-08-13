@@ -39,7 +39,7 @@ async function generateNewSessionAuthToken(username) {
   return newToken;
 }
 
-async function createUser(username, password, role, classRoomId) {
+async function createUser(username, password, role, classRoomId, email, first, last, phone, target, native, location) {
   const passwordHash = await bcrypt.hash(password, 10);
 
   const user = {
@@ -47,11 +47,51 @@ async function createUser(username, password, role, classRoomId) {
     password: passwordHash,
     token: uuid.v4(),
     role: role,
-    classRoomId: classRoomId
+    classRoomId: classRoomId,
+    email: email,
+    firstname: first,
+    lastname: last,
+    phone: phone,
+    target: target,
+    native: native,
+    location: location
   };
   await userCollection.insertOne(user);
 
   return user;
+}
+
+async function addUserToClassroom(classRoomId, username, role) {
+  try {
+    const filter = { classRoomId: classRoomId };
+
+    let updateDoc;
+
+    if (role === "teacher") {
+      updateDoc = {
+        $set: {
+          teacher: username
+        }
+      };
+    } else if (role === "student") {
+      updateDoc = {
+        $push: {
+          studentList: username
+        }
+      };
+    } else {
+      throw new Error("Invalid role provided. Must be 'teacher' or 'student'.");
+    }
+
+    const result = await classroomsCollection.updateOne(filter, updateDoc);
+
+    if (result.modifiedCount === 0) {
+      console.warn("No documents were updated. Check if the classRoomId is correct and the role is valid.");
+    }
+  } catch (error) {
+    console.error("Error adding user to classroom:", error);
+    throw error;
+  }
 }
 
 async function addPrompts(classRoomId, promptsList) {
@@ -328,11 +368,28 @@ async function getStudentUsernamesByClassRoomId(classRoomId) {
   try {
     const filter = { classRoomId: classRoomId };
     
-    const studentUsernames = await classroomsCollection.findOne(filter);
+    const classInfo = await classroomsCollection.findOne(filter);
 
-    return studentUsernames.studentList;
+    return classInfo.studentList;
   } catch (error) {
     console.error("Error setting getting student list for classroom:", error);
+    throw error;
+  }
+}
+
+async function getClassInfo(classRoomId) {
+  try {
+    const filter = { classRoomId: classRoomId };
+    
+    const classInfo = await classroomsCollection.findOne(filter);
+
+    if (classInfo.native && classInfo.target) {
+      return { native: classInfo.native, target: classInfo.target, teacher: !!classInfo.teacher };
+    } else {
+      return { native: null, target: null, teacher: null };
+    }
+  } catch (error) {
+    console.error("Error setting getting info for classroom:", error);
     throw error;
   }
 }
@@ -342,6 +399,7 @@ module.exports = {
   getUserByToken,
   getClassRoomIdByToken,
   createUser,
+  addUserToClassroom,
   generateNewSessionAuthToken,
   addPrompts,
   getPrompt,
@@ -357,5 +415,6 @@ module.exports = {
   setStudentSubmission,
   getLatestComfortRating,
   setRatingForOtherStudent, 
-  getStudentUsernamesByClassRoomId
+  getStudentUsernamesByClassRoomId,
+  getClassInfo
 };

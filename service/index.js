@@ -35,12 +35,33 @@ app.get('/check-auth', (req, res) => {
   }
 });
 
-app.post('/create', async (req, res) => {
-  if (await DB.getUser(req.body.username)) {
-    res.status(409).send({ msg: 'Existing user' });
-  } else {
-    const user = await DB.createUser(req.body.username, req.body.password, req.body.role, req.body.classRoomId);
-    res.send({ id: user._id });
+app.post('/register', async (req, res) => {
+  try {
+    const existingUser = await DB.getUser(req.body.username);
+    if (existingUser) {
+      return res.status(409).send({ msg: 'Username already in use' });
+    }
+
+    const user = await DB.createUser(
+      req.body.username, 
+      req.body.password, 
+      req.body.role, 
+      req.body.classRoomId,
+      req.body.email,
+      req.body.firstname,
+      req.body.lastname,
+      req.body.phone,
+      req.body.target,
+      req.body.native,
+      req.body.location
+    );
+
+    await DB.addUserToClassroom(req.body.classRoomId, req.body.username, req.body.role);
+
+    res.status(201).send({ msg: "Success", id: user._id });
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).send({ msg: "Internal server error" });
   }
 });
 
@@ -66,6 +87,24 @@ app.post('/login', async (req, res) => {
 app.get('/logout', (req, res) => {
   res.clearCookie(authCookieName);
   res.end();
+});
+
+app.get('/getClassInfo', async (req, res) => {
+  const classRoomId = req.query.classRoomId;
+
+  try {
+      let classInfo;
+      if (classRoomId) {
+        classInfo = await DB.getClassInfo(classRoomId);
+
+        res.status(200).json({ native: classInfo.native, target: classInfo.target, teacher: classInfo.teacher });
+      } else {
+        res.status(400).json({ error: "An error occurred while getting the classroom info for this classroom, there was no specified classroom code in request" });
+      }
+  } catch (error) {
+    console.error("Error in getting the clasroom info:", error);
+    res.status(500).json({ error: "An error occurred while getting the clasroom info" });
+  }
 });
 
 app.use(async (req, res, next) => {
