@@ -46,6 +46,10 @@ function NavItem({ setCurrentPage, navItemText, pageLink, setStudentModule, clea
             if (pageLink === pages.Collab) {
                 setStudentModule("");
             }
+
+            if (pageLink === pages.TMC) {
+                window.location.reload();
+            }
             
             setCurrentPage(pageLink);
         }
