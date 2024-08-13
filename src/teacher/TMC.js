@@ -109,15 +109,17 @@ function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentD
                 const response = await fetch("/student-list");
                 if (response.status === 401) {
                     bringBackToLogin();
+                    return;
                 }
-
+    
                 const data = await response.json();
-                setStudentList(data.studentList);
+                console.log(data.studentList);
+                setStudentList(data.studentList.sort((a, b) => a.lastname.localeCompare(b.lastname)));
             } catch (error) {
-                console.error("Error checking if there is a current meeting scheduled:", error);
+                console.error("Error fetching the student list:", error);
             }
         };
-
+    
         getStudentList();
     }, []);
 
