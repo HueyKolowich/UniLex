@@ -102,6 +102,7 @@ function CardHeader({text}) {
 
 function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentData }) {
     const [studentList, setStudentList] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         const getStudentList = async () => {
@@ -113,7 +114,6 @@ function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentD
                 }
     
                 const data = await response.json();
-                console.log(data.studentList);
                 setStudentList(data.studentList.sort((a, b) => a.lastname.localeCompare(b.lastname)));
             } catch (error) {
                 console.error("Error fetching the student list:", error);
@@ -123,24 +123,37 @@ function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentD
         getStudentList();
     }, []);
 
+    const filteredStudentList = studentList.filter(student =>
+        student.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student.lastname.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className="panel">
-            <table className="table table-borderless">
-                <TableHead />
-                <tbody>
-                    { studentList.map((student, index) => (
-                        <TableBodyItem 
-                            key={index} 
-                            index={index} 
-                            student={student} 
-                            setSelectedStudent={setSelectedStudent}
-                            setModalOpen={setModalOpen}
-                            setStudentData={setStudentData}
-                        />
-                    )) }
-                </tbody>
-            </table>
+            <input 
+                type="text" 
+                placeholder="Search by first or last name..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+            />
+            <div className="table-wrapper">
+                <table className="table table-borderless">
+                    <TableHead />
+                    <tbody>
+                        {filteredStudentList.map((student, index) => (
+                            <TableBodyItem 
+                                key={index} 
+                                index={index} 
+                                student={student} 
+                                setSelectedStudent={setSelectedStudent}
+                                setModalOpen={setModalOpen}
+                                setStudentData={setStudentData}
+                            />
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
@@ -152,7 +165,9 @@ function TableHead() {
                 <th scope="col">#</th>
                 <th scope="col">First</th>
                 <th scope="col">Last</th>
-                <th scope="col">Comfort Level</th>
+                <th scope="col">Comfort</th>
+                <th scope="col">Helpfulness</th>
+                <th scope="col">Last Meeting</th>
             </tr>
         </thead>
     );
@@ -196,6 +211,8 @@ function TableBodyItem({ index, student, setSelectedStudent, setModalOpen, setSt
             <td>{student.firstname}</td>
             <td>{student.lastname}</td>
             <td>{comfortableRating}</td>
+            <td>5</td>
+            <td>01/10/1990</td>
         </tr>
     );
 }

@@ -198,3 +198,62 @@ table {
 .hinticon {
   color: #c751cb;
 }
+
+.search-input {
+  color: #fff;
+  background: linear-gradient(to right, #ce66d2, #f1d3f2);
+  width: 100%;
+  border-width: 1px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #fff;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding-top: .3rem;
+  padding-left: .5rem;
+}
+.search-input::placeholder {
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+.table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+}
+
+.table thead {
+  width: 100%;
+}
+
+.table tbody {
+  width: 100%;
+}
+
+.table th, .table td {
+  padding: 0.5rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table-wrapper {
+  max-height: 160px;
+  overflow-y: auto;
+}
+.table-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+.table-wrapper::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+  background-color: #e3a8e5;
+  border-radius: 10px;
+}
+/* For Firefox */
+.table-wrapper {
+  scrollbar-color: #e3a8e5 transparent;
+  scrollbar-width: thin;
+}
