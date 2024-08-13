@@ -97,8 +97,18 @@ function ClassroomCodeCard() {
 }
 
 function ClassroomCodeCardBody() {
+    const [classCode, setClassCode] = useState("");
+
+    useEffect(() => {
+        const getClassroomCode = async () => {
+            setClassCode(localStorage.getItem("classRoomId"));
+        };
+
+        getClassroomCode();
+    }, []);
+
     return (
-        <h3 className="bold">ab7-Df2-Gh5</h3>
+        <h3 className="bold">{classCode}</h3>
     );
 }
 
