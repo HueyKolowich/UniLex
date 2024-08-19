@@ -108,13 +108,27 @@ app.get('/getClassInfo', async (req, res) => {
 });
 
 app.use(async (req, res, next) => {
-  const token = req.cookies[authCookieName];
-  const user = await DB.getUserByToken(token);
-  if (user) {
+  try {
+    const token = req.cookies[authCookieName];
+    if (!token) {
+      return res.status(401).json({ msg: 'Unauthorized: No token provided' });
+    }
+
+    const user = await DB.getUserByToken(token);
+    if (!user) {
+      return res.status(401).json({ msg: 'Unauthorized: Invalid token' });
+    }
+
+    req.user = user;
     next();
-  } else {
-    res.status(401).send({ msg: 'Unauthorized' });
+  } catch (error) {
+    console.error('Authentication error:', error);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
+});
+
+app.get('/role', async (req, res) => {
+  res.status(200).json({ role: req.user.role });
 });
 
 app.get('/generate-video-token', (req, res) => {
@@ -135,10 +149,7 @@ app.get('/generate-video-token', (req, res) => {
 
 app.get('/current-meeting-scheduled', async (req, res) => {
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
-    const events = await DB.getBookedEvents(user.username);
+    const events = await DB.getBookedEvents(req.user.username);
     const now = new Date();
 
     let result = false;
@@ -183,13 +194,10 @@ app.get('/class-assignment', async (req, res) => {
 
 app.get('/prompts', async (req, res) => {
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
     const { promptLevel, filter } = req.query;
 
     const formattedPrompt = 
-      "Generate a " + user.target + 
+      "Generate a " + req.user.target + 
       " discussion prompt based off the " + 
       promptLevel + " ACTFL level. " +
       (filter ? "The topic of the discussion prompt should be: " + filter + ". " : "") +
@@ -233,10 +241,7 @@ app.post('/prompts', async (req, res) => {
 
 app.get('/events', async (req, res) => {
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
-    const events = await DB.getEvents(user.firstname, user.username, user.target);
+    const events = await DB.getEvents(req.user.firstname, req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error getting events:", error);
@@ -248,12 +253,9 @@ app.delete('/events', async (req, res) => {
   const { calEventId } = req.body;
 
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
     await DB.deleteEvent(calEventId);
 
-    const events = await DB.getEvents(user.firstname, user.username, user.target);
+    const events = await DB.getEvents(req.user.firstname, req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error deleting event:", error);
@@ -265,11 +267,8 @@ app.post('/events', async (req, res) => {
   const { start, end } = req.body;
 
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
-    await DB.addEvent(user.username, user.firstname, user.location, start, end, user.native, user.target);
-    res.status(201).json({ message: 'Event added successfully', title: user.firstname, details: user.location });
+    await DB.addEvent(req.user.username, req.user.firstname, req.user.location, start, end, req.user.native, req.user.target);
+    res.status(201).json({ message: 'Event added successfully', title: req.user.firstname, details: req.user.location });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred while adding the event' });
   }
@@ -279,12 +278,9 @@ app.post('/events-status', async (req, res) => {
   const { calEventId } = req.body;
 
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
+    await DB.changeEventStatus(calEventId, req.user.username, req.user.firstname);
 
-    await DB.changeEventStatus(calEventId, user.username);
-
-    const events = await DB.getEvents(user.firstname, user.username, user.target);
+    const events = await DB.getEvents(req.user.firstname, req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error changing status of event:", error);
@@ -296,12 +292,9 @@ app.delete('/events-status', async (req, res) => {
   const { calEventId } = req.body;
 
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
     await DB.removeNameFromEventParticipantList(calEventId);
 
-    const events = await DB.getEvents(user.firstname, user.username, user.target);
+    const events = await DB.getEvents(req.user.firstname, req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error changing status of event:", error);
@@ -311,10 +304,7 @@ app.delete('/events-status', async (req, res) => {
 
 app.get('/meetingcount', async (req, res) => {
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
-    const result = await DB.getDesiredMeetingsCountForUser(user.username);
+    const result = await DB.getDesiredMeetingsCountForUser(req.user.username);
 
     res.status(200).json({ count: result });
   } catch (error) {
@@ -327,10 +317,7 @@ app.post('/meetingcount', async (req, res) => {
   const { meetingsCount } = req.body;
 
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
-    await DB.setDesiredMeetingsCountForUser(user.username, meetingsCount);
+    await DB.setDesiredMeetingsCountForUser(req.user.username, meetingsCount);
 
     res.status(200).json({ msg: "Success" });
   } catch (error) {
@@ -361,12 +348,9 @@ app.post('/submissions', async (req, res) => {
   const { difficultiesSubmission, improvementSubmission, cultureSubmission, otherStudentRating, otherStudentUsername, comfortableRating } = req.body;
 
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
     await DB.setStudentSubmission(
-      user.username, 
-      user.classRoomId, 
+      req.user.username, 
+      req.user.classRoomId, 
       new Date(), 
       difficultiesSubmission, 
       improvementSubmission, 
@@ -385,10 +369,7 @@ app.post('/submissions', async (req, res) => {
 
 app.get('/student-list', async (req, res) => {
   try {
-    const token = req.cookies[authCookieName];
-    const user = await DB.getUserByToken(token);
-
-    const studentUsernameList = await DB.getStudentUsernamesByClassRoomId(user.classRoomId);
+    const studentUsernameList = await DB.getStudentUsernamesByClassRoomId(req.user.classRoomId);
 
     const studentListPromises = studentUsernameList.map(async (username) => {
       const student = await DB.getUser(username);

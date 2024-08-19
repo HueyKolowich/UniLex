@@ -140,7 +140,7 @@ async function getEvents(firstname, username, target) {
       $and: [
         {
           $or: [
-            { title: firstname },
+            { username: firstname },
             { native: target }
           ]
         },
@@ -205,14 +205,21 @@ async function addEvent(username, title, details, start, end, native, target) {
   }
 }
 
-async function changeEventStatus(calEventId, username) {
+async function changeEventStatus(calEventId, username, firstname) {
   try {
     const filter = {
       _id: new ObjectId(calEventId)
     };
+
+    const event = await eventsCollection.findOne(filter);
+    const currentTitle = event.title || "";
+
+    const newTitle = `${currentTitle} + ${firstname}`;
+
     const update = {
       $set: {
-        status: "booked"
+        status: "booked",
+        title: newTitle
       },
       $push: {
         participants: username
