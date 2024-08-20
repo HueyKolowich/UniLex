@@ -1,8 +1,6 @@
 import { useState } from "react";
 import pages from "./Pages";
 
-const uniteLogo = require("./unite-high-resolution-logo-transparent.png");
-
 function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -121,65 +119,53 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
 
     return (
         <div className="container-fluid">
-            <div className="d-flex flex-column align-items-center justify-content-center loginpagebody">
+            <div className="d-flex align-items-center justify-content-around login-body">
                 {!isRegistering && (
-                    <img src={uniteLogo} alt="Unite Logo" id="uniteLogo" />
+                    <div className="d-flex flex-column">
+                        <h2 className="heading-style-h2">
+                            Collaborative
+                        </h2>
+                        <h2 className="heading-style-h2">
+                            Language
+                        </h2>
+                        <h2 className="heading-style-h2">
+                            Learning
+                        </h2>
+                    </div>
                 )}
-                <form className="mt-5">
-                    {isRegistering ? (
-                        <div className="row">
-                            <div className="col-md-6">
-                                <div className="card mb-3">
-                                    <input type="text" id="name" placeholder="Username" className="form-control" onChange={(ev) => setUsername(ev.target.value)} />
+                <div className="d-flex flex-column align-items-center mt-5">
+                    <form className="mb-1">
+                        {isRegistering ? (
+                            <div className="row">
+                                <div className="col-md-6 d-flex flex-column">
+                                        <input type="text" id="name" placeholder="Username" className="text-field text-field-small mb-3" onChange={(ev) => setUsername(ev.target.value)} />
+                                        <input type="text" id="first" placeholder="First Name" className="text-field text-field-small mb-3" onChange={(ev) => setFirst(ev.target.value)} />
+                                        <input type="text" id="last" placeholder="Last Name" className="text-field text-field-small mb-3" onChange={(ev) => setLast(ev.target.value)} />
+                                        <input type="text" id="location" placeholder="Country or State" className="text-field text-field-small mb-3" onChange={(ev) => setLocation(ev.target.value)} />
+                                        <input type="email" id="email" placeholder="Email" className="text-field text-field-small mb-3" onChange={(ev) => setEmail(ev.target.value)} />
                                 </div>
-                                <div className="card mb-3">
-                                    <input type="text" id="first" placeholder="First Name" className="form-control" onChange={(ev) => setFirst(ev.target.value)} />
-                                </div>
-                                <div className="card mb-3">
-                                    <input type="text" id="last" placeholder="Last Name" className="form-control" onChange={(ev) => setLast(ev.target.value)} />
-                                </div>
-                                <div className="card mb-3">
-                                    <input type="text" id="location" placeholder="Country or State" className="form-control" onChange={(ev) => setLocation(ev.target.value)} />
-                                </div>
-                                <div className="card mb-3">
-                                    <input type="email" id="email" placeholder="Email" className="form-control" onChange={(ev) => setEmail(ev.target.value)} />
-                                </div>
-                            </div>
-                            <div className="col-md-6">
-                                <div className="card mb-3">
-                                    <input type="tel" id="phone" placeholder="Phone Number" className="form-control" onChange={(ev) => setPhone(ev.target.value)} />
-                                </div>
-                                <div className="card mb-3">
-                                    <input type="text" id="classCode" placeholder="Classroom Code" className="form-control" onChange={(ev) => setClassRoomId(ev.target.value)} />
-                                </div>
-                                <div className="card mb-3">
-                                    <input type="text" id="role" placeholder="Teacher/Student" className="form-control" onChange={(ev) => setRole(ev.target.value)} />
-                                </div>
-                                <div className="card mb-3">
-                                    <input type="password" id="password" placeholder="Password" className="form-control" onChange={(ev) => setPassword(ev.target.value)} />
-                                </div>
-                                <div className="card mb-3">
-                                    <input type="password" id="confirmPassword" placeholder="Confirm Password" className="form-control" onChange={(ev) => setConfirmPassword(ev.target.value)} />
+                                <div className="col-md-6 d-flex flex-column">
+                                        <input type="tel" id="phone" placeholder="Phone Number" className="text-field text-field-small mb-3" onChange={(ev) => setPhone(ev.target.value)} />
+                                        <input type="text" id="classCode" placeholder="Classroom Code" className="text-field text-field-small mb-3" onChange={(ev) => setClassRoomId(ev.target.value)} />
+                                        <input type="text" id="role" placeholder="Teacher/Student" className="text-field text-field-small mb-3" onChange={(ev) => setRole(ev.target.value)} />
+                                        <input type="password" id="password" placeholder="Password" className="text-field text-field-small mb-3" onChange={(ev) => setPassword(ev.target.value)} />
+                                        <input type="password" id="confirmPassword" placeholder="Confirm Password" className="text-field text-field-small mb-3" onChange={(ev) => setConfirmPassword(ev.target.value)} />
                                 </div>
                             </div>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="card mb-3">
-                                <input type="text" id="name" placeholder="Username" className="form-control" onChange={(ev) => setUsername(ev.target.value)} />
+                        ) : (
+                            <div className="d-flex flex-column">
+                                <input type="text" id="name" placeholder="Username" className="text-field mb-3" onChange={(ev) => setUsername(ev.target.value)} />
+                                <input type="password" id="password" placeholder="Password" className="text-field mb-3" onChange={(ev) => setPassword(ev.target.value)} />
                             </div>
-                            <div className="card mb-3">
-                                <input type="password" id="password" placeholder="Password" className="form-control" onChange={(ev) => setPassword(ev.target.value)} />
-                            </div>
-                        </>
-                    )}
-                </form>
-                <button type="button" id="login" onClick={isRegistering ? register : authenticate} className="btn btn-lg btn-block btn-primary mx-auto mt-4">
-                    {isRegistering ? "Register" : "Login"}
-                </button>
-                <button type="button" onClick={() => setIsRegistering(!isRegistering)} id="registrationButton" className="btn btn-link mt-3">
-                    {isRegistering ? "Already have an account? Login" : "Don't have an account? Register"}
-                </button>
+                        )}
+                    </form>
+                    <button type="button" id="login" onClick={isRegistering ? register : authenticate} className="button">
+                        {isRegistering ? "Register" : "Login"}
+                    </button>
+                    <button type="button" onClick={() => setIsRegistering(!isRegistering)} id="registrationButton" className="btn btn-link registration-option pb-0 mb-0">
+                        {isRegistering ? "Already have an account? Login" : "Don't have an account? Register"}
+                    </button>
+                </div>
             </div>
         </div>
     );    

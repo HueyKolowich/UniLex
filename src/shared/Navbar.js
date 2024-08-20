@@ -1,69 +1,57 @@
 import React from "react";
 import pages from "./Pages";
 
-function Navbar({ setCurrentPage, setStudentModule, cleanup, preventAccessWhenExpiredAuthToken, preventAccessOutsideOfRole }) {
+const unilexNavLogo = require("./unilex-singlecolorNav.svg").default;
+
+function Navbar({ setCurrentPage, setStudentModule, cleanup }) {
     return (
-        <nav className="navbar navbar-expand-lg mb-4 mt-1 mx-1">
+        <nav className="navbar navbar-expand-lg">
             <div className="container-fluid">
-                <span className="navbar-brand bold ms-3">Unite</span>
-                <ul className="navbar-nav me-3">
+            <img src={unilexNavLogo} alt="UniLex" id="unilexNavLogo" />
+                <div className="d-flex justify-content-center align-items-center mx-2">
                     <NavItem 
-                        setCurrentPage={setCurrentPage} 
-                        navItemText="Students" 
-                        pageLink={pages.Collab} 
+                        setCurrentPage={setCurrentPage}  
                         setStudentModule={setStudentModule}
                         cleanup={cleanup}
-                        preventAccessWhenExpiredAuthToken={preventAccessWhenExpiredAuthToken}
-                        preventAccessOutsideOfRole={preventAccessOutsideOfRole}
-                    />
-                    <NavItem 
-                        setCurrentPage={setCurrentPage} 
-                        navItemText="Teachers" 
-                        pageLink={pages.TMC}
-                        cleanup={cleanup}
-                        preventAccessWhenExpiredAuthToken={preventAccessWhenExpiredAuthToken}
-                        preventAccessOutsideOfRole={preventAccessOutsideOfRole}
                     />
                     <LogoutButton setCurrentPage={setCurrentPage} cleanup={cleanup} />
-                </ul>        
+                </div>        
             </div>
         </nav>
     );
 }
 
-function NavItem({ setCurrentPage, navItemText, pageLink, setStudentModule, cleanup, preventAccessWhenExpiredAuthToken, preventAccessOutsideOfRole }) {
+function NavItem({ setCurrentPage, setStudentModule, cleanup }) {
     async function updateCurrentPage() {
         cleanup();
 
-        const isAuthTokenExpired = await preventAccessWhenExpiredAuthToken();
-        const isAccessOutsideRole = preventAccessOutsideOfRole();
+        const roleResponse = await fetch('/role');
+        if (roleResponse.status === 200) {
+            const role = await roleResponse.json();
 
-        if (isAuthTokenExpired || isAccessOutsideRole) {
-            return;
-        } else {
-            localStorage.setItem("currentPage", pageLink);
+            const page = role.role === "student" ? pages.Collab : role.role === "teacher" ? pages.TMC : null;
 
-            if (pageLink === pages.Collab) {
-                setStudentModule("");
+            if (page) {
+                localStorage.setItem("currentPage", page);
+                setCurrentPage(page);
+                if (role.role === "student") {
+                    setStudentModule("");
+                } else {
+                    window.location.reload();
+                }
             }
-
-            if (pageLink === pages.TMC) {
-                window.location.reload();
-            }
-            
-            setCurrentPage(pageLink);
         }
     };
 
     return (
-        <li className="nav-item">
-            <button type="button" className="btn btn-md btn-block btn-primary mx-1" onClick={updateCurrentPage}>{navItemText}</button>
-        </li>
+        <button className="navigation-item mx-2 my-auto" onClick={updateCurrentPage}>
+            Home
+        </button>
     );
 }
 
 function LogoutButton({ setCurrentPage, cleanup }) {
-    function updateCurrentPage() {
+    function logout() {
         cleanup();
 
         localStorage.removeItem("studentModule");
@@ -77,7 +65,9 @@ function LogoutButton({ setCurrentPage, cleanup }) {
     };
 
     return (
-        <button className="bi bi-box-arrow-right my-auto" onClick={updateCurrentPage}></button>
+        <button className="navigation-item mx-2 my-auto" onClick={logout}>
+            Logout
+        </button>
     );
 }
 

@@ -24,8 +24,8 @@ function TMCBody({ bringBackToLogin }) {
                 <AssignmentView />
                 :
                 <div className="container-fluid">
-                    <div className="row my-3">
-                        <div className="col mx-3">
+                    <div className="row my-5 mx-2">
+                        <div className="col">
                             <Table 
                                 bringBackToLogin={bringBackToLogin} 
                                 setSelectedStudent={setSelectedStudent}
@@ -33,7 +33,7 @@ function TMCBody({ bringBackToLogin }) {
                                 setStudentData={setStudentData}
                             />
                         </div>
-                        <div className="col mx-5">
+                        <div className="col">
                             <AssignmentOption setIsConfiguringAssignment={setIsConfiguringAssignment} setIsViewingAssignment={setIsViewingAssignment} />
                             <ClassroomCodeCard />
                         </div>
@@ -73,15 +73,15 @@ function AssignmentOptionBody({ setIsConfiguringAssignment, setIsViewingAssignme
 
     return (
         <div className="card-body">
-            <AssignmentOptionBodyButton handler={startNewAssignment} buttonText={"New Assignment"} />
-            <AssignmentOptionBodyButton handler={viewCurrentAssignment} buttonText={"View Assignment"}/>
+            <AssignmentOptionBodyButton handler={startNewAssignment} buttonText={"New"} />
+            <AssignmentOptionBodyButton handler={viewCurrentAssignment} buttonText={"Current"}/>
         </div>
     );
 }
 
 function AssignmentOptionBodyButton({ handler, buttonText }) {
     return (
-        <button type="button" className="btn btn-lg btn-block btn-primary mx-4" onClick={handler}>{buttonText}</button>
+        <button type="button" className="button mx-4 my-2" onClick={handler}>{buttonText}</button>
     );
 }
 
@@ -108,14 +108,14 @@ function ClassroomCodeCardBody() {
     }, []);
 
     return (
-        <h3 className="bold">{classCode}</h3>
+        <h4 className="heading-style-h4-half primary">{classCode}</h4>
     );
 }
 
 function CardHeader({text}) {
     return (
         <div className="card-header">
-            <h4>{text}</h4>
+            <h4 className="heading-style-h4-half">{text}</h4>
         </div>
     );
 }
@@ -150,14 +150,17 @@ function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentD
 
     return (
         <div className="panel">
-            <input 
-                type="text" 
-                placeholder="Search by first or last name..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-            />
-            <div className="table-wrapper">
+            <div className="d-flex">
+                <i className="bi bi-search" style={{padding: "0.5rem"}}/>
+                <input 
+                    type="text" 
+                    placeholder="Search by first or last name..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="search-input"
+                />
+            </div>
+            <div className="scroll-wrapper">
                 <table className="table table-borderless">
                     <TableHead />
                     <tbody>
@@ -181,7 +184,7 @@ function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentD
 function TableHead() {
     return (
         <thead>
-            <tr>
+            <tr className="table-no-top-border">
                 <th scope="col">#</th>
                 <th scope="col">First</th>
                 <th scope="col">Last</th>

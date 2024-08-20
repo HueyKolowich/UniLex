@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import './App.css';
+import './New.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
 
@@ -95,8 +95,6 @@ function App() {
         setCurrentPage={setCurrentPage} 
         setStudentModule={setStudentModule} 
         cleanup={cleanup} 
-        preventAccessWhenExpiredAuthToken={() => preventAccessWhenExpiredAuthToken()}
-        preventAccessOutsideOfRole={() => preventAccessOutsideOfRole(userRole, currentPage)} 
       />
       {bodyContent}
     </div>
@@ -113,11 +111,6 @@ function discoverUserRole() {
 
 function discoverStudentModule() {
   return localStorage.getItem("studentModule") || "";
-}
-
-async function preventAccessWhenExpiredAuthToken() {
-  const response = await fetch('/check-auth');
-  return !response.ok;
 }
 
 function preventAccessOutsideOfRole(userRole, currentPage) {

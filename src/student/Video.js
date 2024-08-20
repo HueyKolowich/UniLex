@@ -54,16 +54,14 @@ function MeetingView({ onMeetingLeave, leaveRef }) {
     }, [leave, leaveRef]);
 
     return (
-        <div className="container">
-            <div className="row d-flex justify-content-center"> 
+        <div className="d-flex align-items-center"> 
             {[...participants.keys()].map((participantId) => (
-                <div className="col-md-5">
+                <div className="mx-4">
                     <ParticipantView
-                    participantId={participantId}
+                        participantId={participantId}
                     />
                 </div>
             ))}
-            </div>
         </div>
     );
 }
@@ -99,7 +97,7 @@ function ParticipantView({ participantId }) {
     }, [micStream, micOn]);
 
     return (
-        <div className="card d-flex justify-content-center align-items-center interlocutorVideoBox">
+        <div className="card d-flex justify-content-center align-items-center video-box">
             <audio ref={micRef} autoPlay playsInline muted={isLocal} />
             {webcamOn && (
                 <ReactPlayer

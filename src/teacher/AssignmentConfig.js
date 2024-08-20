@@ -12,23 +12,27 @@ function AssignmentConfigurationBody({ setIsConfiguringAssignment, bringBackToLo
 
     return (
         <div className="container-fluid">
-            <form className="row g-3"> 
-                <PromptTaskCountSelector setPromptTaskCount={setPromptTaskCount} />
-                <PromptTaskFields numPromptTasks={promptTaskCount} bringBackToLogin={bringBackToLogin} />
-                <FinishedButton  
-                    bringBackToLogin={bringBackToLogin}
-                    setModalOpen={setModalOpen}
-                />
+            <form className="d-flex flex-column align-items-center justify-content-center"> 
+                <div className="d-flex align-items-center justify-content-evenly">
+                    <PromptTaskCountSelector setPromptTaskCount={setPromptTaskCount} />
+                    <FinishedButton  
+                        bringBackToLogin={bringBackToLogin}
+                        setModalOpen={setModalOpen}
+                    />
+                </div>
+                <div className="scroll-wrapper scroll-wrapper-longer w-100">
+                    <PromptTaskFields numPromptTasks={promptTaskCount} bringBackToLogin={bringBackToLogin} />
+                </div>
             </form>
 
             <Dialog open={modalOpen}>
                 <DialogContent>
                 <div className="text-center">
-                    <h3 style={{color: "#c751cb"}}>The prompts have successfuly been assigned to all students!</h3>
+                    <h3 style={{color: "#F59799"}}>The prompts have successfuly been assigned to all students!</h3>
                 </div>
                 </DialogContent>
                 <DialogActions sx={{justifyContent: "center"}}>
-                <Button onClick={returnToTMC} style={{color: "#ce66d2"}}>
+                <Button onClick={returnToTMC} style={{color: "#000000"}}>
                     Okay
                 </Button>
                 </DialogActions>
@@ -48,12 +52,11 @@ function PromptTaskCountSelector({ setPromptTaskCount }) {
     return (
         <div className="col mx-5">
             <div className="card text-center">        
-                <div data-mdb-input-init className="form-outline">
-                    <label className="form-label" htmlFor="taskCountInput">Select Task Count</label>
+                <div data-mdb-input-init className="form-control">
                     <input 
                     type="number" 
                     id="taskCountInput" 
-                    className="form-control mx-auto"
+                    className="from-control task-count mx-auto"
                     defaultValue="1"
                     min="1"
                     onChange={handleChange}
@@ -117,12 +120,21 @@ function PromptTaskFields({ numPromptTasks, bringBackToLogin }) {
                     <div className="card mb-3">
                         <div className="mx-3 my-3">
                             <div className="row mb-3">
-                                <label className="form-label ps-4" htmlFor={`promptTaskKey${index}`}>Prompt #{index + 1}:</label>
-                                <input 
+                                <label className="form-label heading-style-h6 ps-4" htmlFor={`promptTaskKey${index}`}>Prompt #{index + 1}</label>
+                                {/* <input 
                                     className="form-control" 
                                     name="prompt" 
                                     id={`promptTaskKey${index}`} 
                                     type="text" 
+                                    value={promptTaskFieldValues[index].prompt}
+                                    onChange={(e) => handleChange(e, index)}
+                                /> */}
+
+                                <textarea 
+                                    className="text-field text-field-small" 
+                                    name="prompt"
+                                    id={`promptTaskKey${index}`} 
+                                    rows={2} 
                                     value={promptTaskFieldValues[index].prompt}
                                     onChange={(e) => handleChange(e, index)}
                                 />
@@ -166,7 +178,7 @@ function PromptTaskFields({ numPromptTasks, bringBackToLogin }) {
                                             <option value="Superior">Superior</option>
                                             <option value="Distinguished">Distinguished</option>
                                         </select>
-                                        <button type="button" className="btn btn-lg btn-block btn-primary" onClick={() => generate(index)}>Generate</button>
+                                        <button type="button" className="button" onClick={() => generate(index)}>Generate</button>
                                     </div>
                                 </div>
                             </div>
@@ -216,7 +228,7 @@ function FinishedButton({ bringBackToLogin, setModalOpen }) {
     }
 
     return (
-        <button type="button" className="btn btn-lg btn-block btn-primary mx-auto mb-4" id="doneAssignmentConfigButton" onClick={finish}>Assign to students</button>
+        <button type="button" className="button" id="doneAssignmentConfigButton" onClick={finish}>Assign</button>
     );
 }
 

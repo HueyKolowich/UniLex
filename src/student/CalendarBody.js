@@ -7,7 +7,6 @@ import CalendarDesiredMeetingsCard from "./CalendarDesiredMeetingsCard";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import 'react-big-calendar/lib/sass/styles.scss';
-import "../shared/CustomStyles.scss"
 
 const localizer = momentLocalizer(moment);
 
@@ -184,18 +183,18 @@ function CalendarBody({ bringBackToLogin }) {
 
   const eventStyleGetter = useCallback((event, start, end, isSelected) => {
     const style = {
-      borderRadius: '5px',
+      borderRadius: '3px',
       opacity: 0.8,
       border: '0px',
     };
 
     if (event.status === "waiting") {
-      style.backgroundColor = "#f1d3f2";
-      style.color = "#c751cb";
+      style.backgroundColor = "#FBCCCC";
+      style.color = "#996062";
     }
 
     if (event.status === "booked") {
-      style.backgroundColor = "#c751cb";
+      style.backgroundColor = "#F59799";
       style.color = "#ffffff";
     }
 
@@ -221,7 +220,7 @@ function CalendarBody({ bringBackToLogin }) {
       <Calendar
         defaultDate={moment().toDate()}
         defaultView="week"
-        views={["week"]}
+        views={["week", "day"]}
         events={events}
         dayLayoutAlgorithm={"no-overlap"}
         startAccessor={(event) => new Date(event.start)}
@@ -232,22 +231,22 @@ function CalendarBody({ bringBackToLogin }) {
         formats={formats}
         eventPropGetter={eventStyleGetter}
         selectable
-        style={{ height: "90vh" }}
+        style={{ height: "85vh", marginTop: "2.5rem" }}
       />
 
       <Dialog open={eventModalOpen} onClose={handleEventClose}>
-        <DialogTitle sx={{color: "#ce66d2"}}>Schedule meeting with:</DialogTitle>
+        <DialogTitle sx={{color: "#000000"}}>Schedule meeting with:</DialogTitle>
         <DialogContent>
           <div className="text-center">
-            <h1 style={{color: "#c751cb"}}>{selectedEventDetails?.title}</h1>
-            <h4 style={{color: "#ce66d2"}}>{selectedEventDetails?.details}</h4>
+            <h1 style={{color: "#F59799"}}>{selectedEventDetails?.title}</h1>
+            <h4 style={{color: "#FBCCCC"}}>{selectedEventDetails?.details}</h4>
           </div>
         </DialogContent>
         <DialogActions sx={{justifyContent: "center"}}>
-          <Button onClick={() => handleEventClose()} style={{color: "#ce66d2"}}>
+          <Button onClick={() => handleEventClose()} style={{color: "#000000"}}>
             Cancel
           </Button>
-          <Button onClick={() => handleEventSave(selectedEventDetails)} style={{color: "#ce66d2"}}>
+          <Button onClick={() => handleEventSave(selectedEventDetails)} style={{color: "#000000"}}>
             Schedule
           </Button>
         </DialogActions>

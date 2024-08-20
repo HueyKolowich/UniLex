@@ -1,10 +1,20 @@
+import { useState } from "react";
+import { Dialog, DialogActions, DialogContent, Button } from "@mui/material";
+
 function ReflectionForm({ otherStudentUsername, setStudentModule }) {
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const returnToStudentBody = () => {
+        setModalOpen(false);
+        setStudentModule("");
+    };
+
     return(
-        <div className="card">
+        <div className="d-flex flex-column justify-content-center student-body">
             <div className="container d-flex my-4">
                 <div className="container d-flex flex-column align-items-center justify-content-center">
-                <div className="row justify-content-center">
-                        <h5 className="circle-rating-header mb-1">Rate how helpful your parter was during the conversation:</h5>
+                <div className="row justify-content-center text-center">
+                        <h5 className="mb-1">Rate how helpful your parter was during the conversation:</h5>
                     </div>
                     <div className="row justify-content-center">    
                         <div className="rating-wrapper">
@@ -38,8 +48,8 @@ function ReflectionForm({ otherStudentUsername, setStudentModule }) {
                     </div>
                 </div>
                 <div className="container d-flex flex-column align-items-center justify-content-center">
-                    <div className="row justify-content-center">
-                        <h5 className="circle-rating-header mb-1">How comfortable did you feel during the conversation?</h5>
+                    <div className="row justify-content-center tex-center">
+                        <h5 className="mb-1">How comfortable did you feel during the conversation?</h5>
                     </div>
                     <div className="row justify-content-center">    
                         <div className="rating-wrapper">
@@ -74,16 +84,29 @@ function ReflectionForm({ otherStudentUsername, setStudentModule }) {
                 </div>
             </div>
             
-            <textarea className="reflectionFormTextField mb-3 mx-3" id="difficultiesSubmission" placeholder="Please describe any difficulties that you had this week in your conversation:" rows={2} />
-            <textarea className="reflectionFormTextField mb-3 mx-3" id="improvementSubmission" placeholder="Based on this most recent conversation, what would you like to improve on:" rows={2} />
-            <textarea className="reflectionFormTextField mb-3 mx-3" id="cultureSubmission" placeholder="Describe what you learned about your partner's language and culture during this week's conversation:" rows={2} />
+            <textarea className="text-field text-field-small mb-3 mx-3" id="difficultiesSubmission" placeholder="Please describe any difficulties that you had this week in your conversation:" rows={2} />
+            <textarea className="text-field text-field-small mb-3 mx-3" id="improvementSubmission" placeholder="Based on this most recent conversation, what would you like to improve on:" rows={2} />
+            <textarea className="text-field text-field-small mb-3 mx-3" id="cultureSubmission" placeholder="Describe what you learned about your partner's language and culture during this week's conversation:" rows={2} />
             
-            <SumbitButton otherStudentUsername={otherStudentUsername} setStudentModule={setStudentModule} />
+            <SumbitButton otherStudentUsername={otherStudentUsername} setModalOpen={setModalOpen} />
+
+            <Dialog open={modalOpen}>
+                <DialogContent>
+                <div className="text-center">
+                    <h3>Your form has submitted successfuly!</h3>
+                </div>
+                </DialogContent>
+                <DialogActions sx={{justifyContent: "center"}}>
+                <Button onClick={returnToStudentBody} sx={{color: "#ffffff"}}>
+                    Okay
+                </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }
 
-function SumbitButton({ otherStudentUsername, setStudentModule }) {
+function SumbitButton({ otherStudentUsername, setModalOpen }) {
     async function submit() {
         try {
             const difficultiesSubmission = document.getElementById("difficultiesSubmission").value;
@@ -124,8 +147,7 @@ function SumbitButton({ otherStudentUsername, setStudentModule }) {
                 throw new Error(`Server error: ${response.statusText}`);
             }
 
-            window.alert("Submission successful!");
-            setStudentModule("");
+            setModalOpen(true);
         } catch (error) {
             console.error("Error in submit action:", error);
             alert('An error occurred while submitting your response. Please try again.');
@@ -133,7 +155,7 @@ function SumbitButton({ otherStudentUsername, setStudentModule }) {
     }
 
     return (
-        <button type="button" className="btn btn-lg btn-block btn-primary mx-auto my-4" id="submitReflectionButton" onClick={submit}>Submit</button>
+        <button type="button" className="button mx-auto my-4" id="submitReflectionButton" onClick={submit}>Submit</button>
     );
 }
 

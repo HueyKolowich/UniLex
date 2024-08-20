@@ -1,0 +1,296 @@
+/* Colors */
+/* 
+- F59799
+- FBCCCC
+- D2E8C7 
+*/
+.primary {
+    color: #F59799;
+}
+.secondary {
+    color: #FBCCCC;
+}
+.tertiary {
+    color: #D2E8C7;
+}
+
+/* General */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Playfair Display' !important;
+}
+:focus{
+    outline: none !important;
+}
+:focus-visible {
+    outline: 3px solid #f5f5f5 !important;
+}
+::placeholder {
+    color: #bbbbbb !important;
+}
+
+/* Cards */
+.card {
+    background: transparent;
+    border-style: solid;
+    --bs-card-border-color: rgb(255 255 255) !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    overflow: clip;
+}
+
+.card-header {
+    background: none !important;
+}
+
+/* Headers */
+.heading-style-h2 {
+    font-size: 6.8rem;
+    font-weight: 500;
+}
+.heading-style-h4 {
+    font-size: 5.5rem;
+    font-weight: 400;
+}
+.heading-style-h4-half {
+    font-size: 3.5rem;
+    font-weight: 400;
+}
+.heading-style-h5 {
+    font-size: 2.5rem;
+    font-weight: 300;
+}
+.heading-style-h6 {
+    font-size: 1.5rem;
+    font-weight: 200;
+}
+
+/* Buttons */
+.button {
+    background: none;
+    border: 3px solid transparent;
+    border-radius: 6px;
+    font-size: 1.6rem;
+    border-image-slice: 1;
+    position: relative;
+    padding: 0.15rem 0.5rem;
+    z-index: 1;
+}
+.button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    padding: 3px;
+    background: linear-gradient(45deg, #D2E8C7, #FBCCCC, #D2E8C7);
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Forms */
+.text-field {
+    background-color: #f5f5f5;
+    border: 3px solid transparent;
+    border-radius: 8px;
+    transition: background-color .45s cubic-bezier(.215,.61,.355,1),border-color .45s cubic-bezier(.215,.61,.355,1);
+    padding: 0.6rem 0.8rem;
+    font-size: 1.4rem;
+}
+.text-field:hover {
+    background-color: #ffffff;
+    outline: 3px solid #FBCCCC;
+}
+
+.text-field-small {
+    padding: 0.4rem 0.6rem;
+    font-size: 1.2rem;
+}
+
+/* Login */
+.login-body {
+    height: 85vh !important;
+}
+
+.registration-option {
+    color: #000000 !important;
+}
+.registration-option:hover {
+    color: #D2E8C7 !important;
+}
+
+/* Navigation */
+.navigation-item {
+    background: none;
+    border: none;
+}
+.navigation-item:hover {
+    color: #D2E8C7;
+}
+
+#unilexNavLogo {
+    height: 50px;
+    width: auto;
+}
+
+/* Student */
+.student-body {
+    height: 85vh !important;
+}
+
+.student-module-card {
+    height: 200px;
+}
+
+.student-module-icon {
+    font-size: 100px !important;
+    cursor: pointer;
+    transition: color 0.35s;
+}
+.student-module-icon:hover,
+.student-module-icon:hover ~ .student-module-icon {
+    color: #F59799;
+}
+
+.next-prompt-icon {
+    font-size: 75px !important;
+    cursor: pointer;
+    color: #D2E8C7;
+}
+
+.icon-disabled {
+    color: #000000;
+    cursor: default;
+}
+.icon-disabled:hover {
+    color: #000000;
+}
+
+.video-box {
+    width: 100% !important;
+    max-width: 480px;
+    border-radius: 6px;
+    box-shadow:
+        0.3em 0.3em 1em rgba(119, 119, 119, 0.5);
+}
+
+.suggestions {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 240px;
+    max-height: 360px;
+}
+
+.spinner-border {
+    color: #FBCCCC !important;
+    width: 200px !important;
+    height: 200px !important;
+    --bs-spinner-border-width: 1.00em !important;
+    --bs-spinner-animation-speed: 1s !important;
+}
+
+.rating-wrapper {
+    align-self: center;
+    display: inline-flex;
+    direction: rtl !important;
+    margin-left: auto;
+
+    label {
+        color: #FBCCCC;
+        cursor: pointer;
+        display: inline-flex;
+        font-size: 4rem;
+        padding: 1rem .6rem;
+        transition: color 0.5s;
+    }
+
+    .star-input,
+    .circle-input  {
+        display: none;
+    }
+
+    label:hover,
+    label:hover ~ label,
+    input:checked ~ label  {
+        color: #F59799;
+    } 
+}
+
+/* Teacher */
+.search-input {
+color: #000000;
+width: 100%;
+border: none;
+}
+.search-input:focus-visible {
+    outline: none !important;
+}
+
+.table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+}
+
+.table thead {
+    width: 100%;
+}
+
+.table tbody {
+    width: 100%;
+}
+
+.table th, .table td {
+    padding: 0.5rem;
+    text-align: left;
+    white-space: nowrap;
+    font-size: 1.4rem;
+    font-weight: 200;
+}
+
+.table th {
+    color: #F59799 !important;
+}
+
+.table tr {
+    border-top: 1px solid #bbbbbb;
+    position: relative;
+}
+
+.table-no-top-border {
+    border-top: none !important;
+}
+
+.scroll-wrapper {
+    max-height: 500px;
+    overflow-y: auto;
+    scrollbar-color: #bbbbbb transparent;
+    scrollbar-width: thin;
+}
+.scroll-wrapper::-webkit-scrollbar {
+    width: 4px;
+}
+.scroll-wrapper::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+.scroll-wrapper::-webkit-scrollbar-thumb {
+    background-color: #bbbbbb;
+    border-radius: 6px;
+}
+
+.task-count {
+    font-size: 1.5rem !important;
+    border: none !important;
+    outline: none !important;
+}

@@ -1,9 +1,9 @@
 {
-  "short_name": "Unite",
-  "name": "Unite",
+  "short_name": "UniLex",
+  "name": "UniLex",
   "icons": [
     {
-      "src": "unite-favicon.ico",
+      "src": "unilex-favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     }

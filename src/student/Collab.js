@@ -99,14 +99,10 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
         ) : (
             <div>
                 { meetingId ? (
-                    <div className="container-fluid">
-                        <div className="row mt-5 d-flex justify-content-between align-items-stretch">
-                            <div className="col-md-9">
-                                <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} leaveRef={leaveRef} />
-                            </div>
-                            <div className="col-md-3">
-                                <PromptHelps promptHelps={promptHelps} />
-                            </div>
+                    <div className="container-fluid student-body d-flex flex-column justify-content-evenly">
+                        <div className="d-flex justify-content-evenly mt-2">
+                            <VideoSDKMeetingProvider videoToken={videoToken} meetingId={meetingId} setMeetingId={setMeetingId} leaveRef={leaveRef} />
+                            <PromptHelps promptHelps={promptHelps} />
                         </div>
                         <DiscussionPrompt
                             currentPrompt={currentPrompt}
@@ -116,7 +112,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
                         />
                     </div>
                 ) : (
-                    <div className="d-flex justify-content-center align-items-center">
+                    <div className="student-body d-flex justify-content-center align-items-center">
                         <div className="spinner-border" role="status" />
                     </div>
                 )}
@@ -126,21 +122,39 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
 }
 
 function PromptHelps({ promptHelps }) {
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, 10000);
+  
+      return () => clearTimeout(timer);
+    }, []);
+
     try {
     return (
-        <div className="card h-100 me-5">
-            <div className="card-header text-center">Suggestions</div>
-            <div className="card-body text-center d-flex flex-column justify-content-center">
-                {promptHelps.map((help, index) => (
-                    <p className="my-3" key={index}>{help}</p>
-                ))}
+         isVisible ? (
+            <div className="card suggestions">
+                <div className="card-header text-center">
+                    <h6 className="heading-style-h6 primary">Suggestions</h6>
+                </div>
+                <div className="card-body text-center d-flex flex-column justify-content-center">
+                    {promptHelps.map((help, index) => (
+                        <p className="my-3" key={index}>{help}</p>
+                    ))}
+                </div>
             </div>
-        </div>
+        ) : (
+            <></>
+        )
     );
     } catch (error) {
         return (
-            <div className="card h-100 me-5">
-            <div className="card-header text-center">Suggestions</div>
+            <div className="card suggestions">
+            <div className="card-header text-center">
+                <h6 className="heading-style-h6 primary">Suggestions</h6>
+            </div>
             <div className="card-body text-center d-flex flex-column justify-content-center">
                 <p className="my-3">No hints available</p>
             </div>
@@ -152,7 +166,7 @@ function PromptHelps({ promptHelps }) {
 function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, clientId }) {
     const timeRenderer = ({ minutes, seconds, completed }) => {
         return (
-            <span className="d-flex" style={{width: '100px'}}>
+            <span className="d-flex" style={{width: "75px"}}>
                 {completed ? (
                     <h1>00:00</h1>
                 ) : (
@@ -167,49 +181,55 @@ function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, client
     };
 
     return (
-        <div>
+        <div className="mt-4">
             { currentPrompt.prompt ? (
-                <div className="d-flex my-5">
-                    <div className="card w-100">
-                        <div className="card-header text-center">
-                            <h5 className="my-1">Discuss the following together:</h5>
-                        </div>
-                        <div className="card-body text-center">
-                            <DiscussionPromptText prompt={currentPrompt.prompt} />
-                        </div>
-                    </div>
-                    <div className="d-flex justify-content-center align-items-center ms-5 me-4">
+                <div className="d-flex align-items-center my-3">
+                    <div className="d-flex justify-content-center align-items-center ms-4 me-5" style={{height: "112px"}}>
                         <Countdown 
                             date={Date.now() + currentPrompt.time}
                             renderer={timeRenderer}
                             overtime={true}
                         />
                     </div>
+                    <div className="card w-100">
+                        <div className="card-header text-center heading-style-h5">
+                            <h5 className="heading-style-h5 primary">Discuss the following together:</h5>
+                        </div>
+                        <div className="card-body text-center">
+                            <DiscussionPromptText prompt={currentPrompt.prompt} />
+                        </div>
+                    </div>
+                    <div className="d-flex justify-content-center align-items-center mx-3">
+                        <NextPromptButton
+                            collabSession={collabSession}
+                            clientWithLock={clientWithLock}
+                            clientId={clientId}
+                        />
+                    </div>
                 </div>
             ) : (
-                <div className="card my-5">
-                    <div className="card-header text-center">
-                        <h5 className="my-1">Discuss the following together:</h5>
-                    </div>
-                    <div className="card-body text-center">
-                        <DiscussionPromptText prompt={currentPrompt.prompt} />
-                    </div>
+                <div className="d-flex flex-column align-items-center justify-content-center">
+                    <h5 className="heading-style-h5 text-center primary">
+                        { clientWithLock === clientId ? 
+                        "Take a minute to introduce yourselves! Click the icon whenever you are ready for the next prompt." 
+                        : 
+                        "Take a minute to introduce yourselves!"
+                        }
+                        </h5>
+                    <NextPromptButton
+                        collabSession={collabSession}
+                        clientWithLock={clientWithLock}
+                        clientId={clientId}
+                    />
                 </div>
             )}
-            <div className="d-flex justify-content-center">
-                <NextPromptButton
-                    collabSession={collabSession}
-                    clientWithLock={clientWithLock}
-                    clientId={clientId}
-                />
-            </div>
         </div>
     );
 }
 
 function DiscussionPromptText({ prompt }) {
     return (
-        <h4 className="my-1 DiscussionPromptText">{prompt}</h4>
+        <h4>{prompt}</h4>
     );
 }
 
@@ -219,15 +239,7 @@ function NextPromptButton({ collabSession, clientWithLock, clientId }) {
     };
 
     return (
-        <button
-            type="button"
-            className="btn btn-lg btn-block btn-primary mx-auto mb-4"
-            id="nextPromptButton"
-            onClick={next}
-            hidden={clientWithLock !== clientId}
-        >
-            Next
-        </button>
+        <i className="bi bi-chevron-double-right next-prompt-icon" onClick={next} hidden={clientWithLock !== clientId} />
     );
 }
 
