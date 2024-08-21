@@ -97,7 +97,7 @@ function ReflectionForm({ otherStudentUsername, setStudentModule }) {
                 </div>
                 </DialogContent>
                 <DialogActions sx={{justifyContent: "center"}}>
-                <Button onClick={returnToStudentBody} sx={{color: "#ffffff"}}>
+                <Button onClick={returnToStudentBody} sx={{color: "#000000"}}>
                     Okay
                 </Button>
                 </DialogActions>
