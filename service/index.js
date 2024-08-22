@@ -241,7 +241,7 @@ app.post('/prompts', async (req, res) => {
 
 app.get('/events', async (req, res) => {
   try {
-    const events = await DB.getEvents(req.user.firstname, req.user.username, req.user.target);
+    const events = await DB.getEvents(req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error getting events:", error);
@@ -255,7 +255,7 @@ app.delete('/events', async (req, res) => {
   try {
     await DB.deleteEvent(calEventId);
 
-    const events = await DB.getEvents(req.user.firstname, req.user.username, req.user.target);
+    const events = await DB.getEvents(req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error deleting event:", error);
@@ -280,7 +280,7 @@ app.post('/events-status', async (req, res) => {
   try {
     await DB.changeEventStatus(calEventId, req.user.username, req.user.firstname);
 
-    const events = await DB.getEvents(req.user.firstname, req.user.username, req.user.target);
+    const events = await DB.getEvents(req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error changing status of event:", error);
@@ -294,7 +294,7 @@ app.delete('/events-status', async (req, res) => {
   try {
     await DB.removeNameFromEventParticipantList(calEventId);
 
-    const events = await DB.getEvents(req.user.firstname, req.user.username, req.user.target);
+    const events = await DB.getEvents(req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error changing status of event:", error);

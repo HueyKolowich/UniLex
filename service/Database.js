@@ -134,13 +134,13 @@ async function getPrompt(classRoomId, position) {
   }
 }
 
-async function getEvents(firstname, username, target) {
+async function getEvents(username, target) {
   try {
     const result = await eventsCollection.find({
       $and: [
         {
           $or: [
-            { username: firstname },
+            { username: username },
             { native: target }
           ]
         },
@@ -148,13 +148,9 @@ async function getEvents(firstname, username, target) {
           $or: [
             { status: { $ne: "booked" } },
             {
-              $or: [
-                {
-                  $and: [
-                    { status: "booked"},
-                    { participants: username}
-                  ]
-                }
+              $and: [
+                { status: "booked"},
+                { participants: username}
               ]
             }
           ]
