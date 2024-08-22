@@ -254,8 +254,13 @@ async function removeNameFromEventParticipantList(calEventId) {
     const filter = {
       _id: new ObjectId(calEventId)
     };
+    
+    const event = await eventsCollection.findOne(filter);
+    const otherParticipant = await getUser(event.participants[0]);
+
     const update = {
       $set: {
+        title: otherParticipant.firstname,
         status: "waiting"
       },
       $pop: {
