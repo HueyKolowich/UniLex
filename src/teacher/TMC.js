@@ -290,8 +290,8 @@ function TableHead({ handleSort }) {
                 <th scope="col">#</th>
                 <th scope="col" onClick={() => handleSort("firstname")}>First</th>
                 <th scope="col" onClick={() => handleSort("lastname")}>Last</th>
-                <th scope="col" onClick={() => handleSort("rating")}>Comfort</th>
                 <th scope="col" onClick={() => handleSort("score")}>Helpfulness</th>
+                <th scope="col" onClick={() => handleSort("rating")}>Comfort</th>
                 <th scope="col" onClick={() => handleSort("recent")}>Last Meeting</th>
             </tr>
         </thead>
@@ -318,8 +318,8 @@ function TableBodyItem({ index, student, setSelectedStudent, setModalOpen, setSt
             <th scope="row">{index + 1}</th>
             <td>{student.firstname}</td>
             <td>{student.lastname}</td>
-            <td>{student.rating}</td>
             <td>{student.score}</td>
+            <td>{student.rating}</td>
             <td>{formatGMTDate(student.recent).date}</td>
         </tr>
     );
