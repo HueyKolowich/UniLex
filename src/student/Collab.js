@@ -42,8 +42,8 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
                 collabSession.socket.close();
             }
         };
-    }, []); // Empty dependency array ensures this runs only once
-
+    }, []);
+    
     useEffect(() => {
         if (collabSession) {
             collabSession.send({ WebSocketRequestType: webSocketMessageTypes.Initialize });
