@@ -5,7 +5,7 @@ import ReflectionForm from './ReflectionForm.js';
 import { getVideoToken, VideoSDKMeetingProvider } from './Video.js';
 import webSocketMessageTypes from '../shared/WebSocketMessageTypes.js';
 
-function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentModule }) {
+function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentModule, soughtUsername }) {
     const [collabSession, setCollabSession] = useState(null);
     const [meetingId, setMeetingId] = useState(null);
     const [videoToken, setVideoToken] = useState(null);
@@ -25,6 +25,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
                     localStorage.getItem("classRoomId"), 
                     vidToken, 
                     localStorage.getItem("username"),
+                    soughtUsername,
                     (message) => handleWebSocketMessage(message)
                 );
                 collabSessionRef.current = session;
@@ -112,8 +113,9 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
                         />
                     </div>
                 ) : (
-                    <div className="student-body d-flex justify-content-center align-items-center">
-                        <div className="spinner-border" role="status" />
+                    <div className="student-body d-flex flex-column justify-content-center align-items-center">
+                        <div className="spinner-border mb-5" role="status" />
+                        <h5 className="heading-style-h5 text-center primary">Waiting for the other participant to join the meeting...</h5>
                     </div>
                 )}
             </div>

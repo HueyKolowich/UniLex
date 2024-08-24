@@ -153,18 +153,21 @@ app.get('/current-meeting-scheduled', async (req, res) => {
     const now = new Date();
 
     let result = false;
+    let otherParticipantUsername = "";
 
     for (const event of events) {
       const start = new Date(event.start);
       const end = new Date(event.end);
 
       if (start <= now && now <= end) {
+        otherParticipantUsername = event.participants.filter((username) => username !== req.user.username)[0];
         result = true;
+
         break;
       }
     }
 
-    res.status(200).json({ result: result });
+    res.status(200).json({ result: result, soughtUsername: otherParticipantUsername });
   } catch (error) {
     console.error('Error checking if there is a current meeting scheduled:', error);
     res.status(500).json({ error: 'An error occurred while checking if there is a current meeting scheduled' });

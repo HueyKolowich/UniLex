@@ -20,6 +20,7 @@ function webSocketHandler(server) {
         const classRoomId = query.classRoomId;
         const videoToken = query.videoToken;
         const username = query.username;
+        const soughtUsername = query.soughtUsername;
 
         if (!videoToken || !classRoomId || !username) {
             socket.destroy();
@@ -30,12 +31,13 @@ function webSocketHandler(server) {
             ws.classRoomId = classRoomId;
             ws.videoToken = videoToken;
             ws.username = username;
+            ws.soughtUsername = soughtUsername;
             wss.emit('connection', ws, request);
         });
     });
 
     wss.on('connection', async (ws) => {
-        const connection = { id: uuid.v4(), ws: ws, classRoomId: ws.classRoomId, username: ws.username };
+        const connection = { id: uuid.v4(), ws: ws, classRoomId: ws.classRoomId, username: ws.username, soughtUsername: ws.soughtUsername };
         await groupManager(connection, ws.videoToken);
 
         logGroups();
@@ -127,10 +129,18 @@ function webSocketHandler(server) {
 async function groupManager(connection, token) {
     let groupKey = null;
 
-    for (const [key, value] of groups) {
-        if (value.size <= 1) {
-            value.add(connection);
-            promptCounters.set(key, {currentParticipantReceivingPrompts: connection, promptIndex: 0, finishedFirstParticipantsPrompts: false});
+    for (const [key, group] of groups) {
+        const hasSoughtUsername = [...group].some(
+            conn => (conn.username === connection.soughtUsername && conn.soughtUsername === connection.username)
+        );
+
+        if (group.size <= 1 && hasSoughtUsername) {
+            group.add(connection);
+            promptCounters.set(key, {
+                currentParticipantReceivingPrompts: connection,
+                promptIndex: 0,
+                finishedFirstParticipantsPrompts: false
+            });
 
             groupKey = key;
             break;

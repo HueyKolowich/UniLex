@@ -4,6 +4,7 @@ import CollabBody from "./Collab";
 
 function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveRef, bringBackToLogin }) {
     const [isMeetingEntryDisabled, setIsMeetingEntryDisabled] = useState(true);
+    const [soughtUsername, setSoughtUsername] = useState("");
 
     useEffect(() => {
         const checkForMeetings = async () => {
@@ -15,6 +16,7 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
 
                 const data = await response.json();
                 setIsMeetingEntryDisabled(!data.result);
+                setSoughtUsername(data.soughtUsername);
             } catch (error) {
                 console.error("Error checking if there is a current meeting scheduled:", error);
             }
@@ -34,6 +36,7 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
                 leaveRef={leaveRef} 
                 bringBackToLogin={bringBackToLogin}
                 setStudentModule={setStudentModule}
+                soughtUsername={soughtUsername}
                 />;
             break;
         default:
