@@ -13,6 +13,15 @@ function App() {
   const [userRole, setUserRole] = useState(() => discoverUserRole());
   const [currentPage, setCurrentPage] = useState(() => discoverCurrentPage());
   const [studentModule, setStudentModule] = useState(() => discoverStudentModule());
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    function detectMobile() {
+      return /Mobi|Android/i.test(navigator.userAgent);
+    }
+
+    setIsMobile(detectMobile());
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("currentPage", currentPage);
@@ -45,6 +54,14 @@ function App() {
     localStorage.setItem("currentPage", pages.Default);
     setCurrentPage(pages.Default);
   };
+
+  if (isMobile) {
+    return (
+      <div className="mobile-warning mt-5 mx-auto text-center">
+        <h2>UniLex is better experienced on a computer. Please switch to your computer to use this application.</h2>
+      </div>
+    );
+  }
 
   let bodyContent;
   switch (currentPage) {
