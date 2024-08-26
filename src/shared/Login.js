@@ -13,9 +13,12 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
     const [role, setRole] = useState("");
     const [classRoomId, setClassRoomId] = useState("");
     const [isRegistering, setIsRegistering] = useState(false);
+    const [incorrectPassword, setIncorrectPassword] = useState(false);
 
     async function authenticate() {
         try {
+            setIncorrectPassword(false);
+
             const authenticationResponse = await fetch('/login', {
                 method: "POST",
                 headers: {
@@ -24,6 +27,10 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
                 credentials: "include",
                 body: JSON.stringify({ "username": username, "password": password })
             });
+            if (authenticationResponse.status === 401) {
+                setIncorrectPassword(true);
+            }
+
             const authenticationResult = await authenticationResponse.json();
 
             if (authenticationResult.msg.includes("Success")) {
@@ -134,7 +141,12 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
                     </div>
                 )}
                 <div className="d-flex flex-column align-items-center mt-5">
-                    <form className="mb-1">
+                    <form className="mb-1 text-center">
+                        {!isRegistering && incorrectPassword ? (
+                            <p className="incorrect-password">Username or Password is incorrect</p>
+                        ) : (
+                            <></>
+                        )}
                         {isRegistering ? (
                             <div className="row">
                                 <div className="col-md-6 d-flex flex-column">

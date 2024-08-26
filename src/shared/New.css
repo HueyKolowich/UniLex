@@ -130,6 +130,22 @@ html, body {
     color: #D2E8C7 !important;
 }
 
+.incorrect-password {
+    color: #ffffff;
+    animation: fadeText 5s ease-in-out;
+}
+@keyframes fadeText {
+    0% {
+        color: white;
+    }
+    15% {
+        color: red;
+    }
+    100% {
+        color: white;
+    }
+}
+
 /* Navigation */
 .navigation-item {
     background: none;
