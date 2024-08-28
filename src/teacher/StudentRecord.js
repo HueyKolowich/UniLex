@@ -17,7 +17,7 @@ function StudentRecord({ modalOpen, setModalOpen, selectedStudent, studentData }
             <DialogContent>
                 { studentData.map((submission) => (
                     <div className="card my-3">
-                        <div className="card-body">
+                        <div className="card-body student-record-body">
                             <div className="d-flex justify-content-between">
                                 <h5>{formatGMTDate(submission.attendedMeeting).date}</h5>
                                 <h5>{formatGMTDate(submission.attendedMeeting).time}</h5>
