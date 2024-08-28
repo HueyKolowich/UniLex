@@ -123,13 +123,28 @@ async function getAllPrompts(classRoomId) {
 
 
 async function getPrompt(classRoomId, position) {
-  const result = await promptsCollection.findOne(
-    { classRoomId: classRoomId },
-    { projection: { promptsList: { $slice: [position, 1] } } }
-  );
-  if (result && result.promptsList.length > 0) {
-    return result.promptsList[0];
-  } else {
+  try {
+    const capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    const language = await classroomsCollection.findOne(
+      { classRoomId: classRoomId },
+      { projection: { target: 1 } }
+    );
+
+    const classPrompt = await promptsCollection.findOne(
+      { classRoomId: classRoomId },
+      { projection: { promptsList: { $slice: [position, 1] } } }
+    );
+
+    if (classPrompt && classPrompt.promptsList.length > 0) {
+      return { ...classPrompt.promptsList[0], language: language ? capitalizeFirstLetter(language.target) : "" };
+    } else {
+      return "";
+    }
+  } catch (error) {
+    console.error("Error fetching prompt:", error);
     return "";
   }
 }

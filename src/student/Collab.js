@@ -9,7 +9,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
     const [collabSession, setCollabSession] = useState(null);
     const [meetingId, setMeetingId] = useState(null);
     const [videoToken, setVideoToken] = useState(null);
-    const [currentPrompt, setCurrentPrompt] = useState({ prompt: '' });
+    const [currentPrompt, setCurrentPrompt] = useState({ prompt: '', time: 0, language: '' });
     const [promptHelps, setPromptHelps] = useState(['\n', '\n', '\n', '\n', '\n']);
     const [clientWithLock, setClientWithLock] = useState(null);
     const [clientId, setClientId] = useState(null);
@@ -60,7 +60,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
                 setMeetingId(messageObject.MeetingId);
                 break;
             case "GetPrompt":
-                setCurrentPrompt({ prompt: messageObject.newPrompt.prompt, time: messageObject.newPrompt.time });
+                setCurrentPrompt(messageObject.newPrompt);
 
                 if (messageObject.promptHelps) {
                     const parsedPromptHelps = JSON.parse(messageObject.promptHelps);
@@ -195,7 +195,7 @@ function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, client
                     </div>
                     <div className="card w-100">
                         <div className="card-header text-center heading-style-h5">
-                            <h5 className="heading-style-h5 primary">Discuss the following together:</h5>
+                            <h5 className="heading-style-h5 primary">Discuss the following in {currentPrompt.language} together:</h5>
                         </div>
                         <div className="card-body text-center">
                             <DiscussionPromptText prompt={currentPrompt.prompt} />
