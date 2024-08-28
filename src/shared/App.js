@@ -74,7 +74,8 @@ function App() {
           />;
       } else {
         localStorage.setItem("currentPage", pages.TMC);
-        bodyContent = <TMCBody 
+        bodyContent = <TMCBody
+            localStorageClassRoomId={localStorage.getItem("classRoomId")} 
             bringBackToLogin={bringBackToLogin} 
           />;
       }

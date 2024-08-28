@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogActions, Button } from "@mui/material";
 
 import AssignmentConfigurationBody from "./AssignmentConfig";
 import AssignmentView from "./AssignmentView";
 import StudentRecord from "./StudentRecord";
 import formatGMTDate from "./FormatGMTDate";
 
-function TMCBody({ bringBackToLogin }) {
+function TMCBody({ localStorageClassRoomId, bringBackToLogin }) {
+    const [classRoomId, setClassRoomId] = useState(localStorageClassRoomId);
     const [isConfiguringAssignment, setIsConfiguringAssignment] = useState(false);
     const [isViewingAssignment, setIsViewingAssignment] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
@@ -29,7 +31,8 @@ function TMCBody({ bringBackToLogin }) {
                         <div className="col">
                             <div className="d-flex flex-column mb-4">
                                 <ClassStats classStats={classStats} />
-                                <Table 
+                                <Table
+                                    classRoomId={classRoomId} 
                                     bringBackToLogin={bringBackToLogin} 
                                     setSelectedStudent={setSelectedStudent}
                                     setModalOpen={setModalOpen}
@@ -39,8 +42,8 @@ function TMCBody({ bringBackToLogin }) {
                             </div>
                         </div>
                         <div className="col">
+                            <ClassroomCodeCard classRoomId={classRoomId} setClassRoomId={setClassRoomId} />
                             <AssignmentOption setIsConfiguringAssignment={setIsConfiguringAssignment} setIsViewingAssignment={setIsViewingAssignment} />
-                            <ClassroomCodeCard />
                         </div>
                     </div>
 
@@ -123,42 +126,119 @@ function AssignmentOptionBodyButton({ handler, buttonText }) {
     );
 }
 
-function ClassroomCodeCard() {
-    const headerText = "My Classroom Code";
-
+function ClassroomCodeCard({ classRoomId, setClassRoomId }) {
     return (
         <div className="card text-center mb-4">
-            <CardHeader text={headerText} />
-            <ClassroomCodeCardBody />
+            <ClassroomCodeHeader classRoomId={classRoomId} setClassRoomId={setClassRoomId} />
+            <ClassroomCodeCardBody classRoomId={classRoomId} />
         </div>
     );
 }
 
-function ClassroomCodeCardBody() {
-    const [classCode, setClassCode] = useState("");
+function ClassroomCodeHeader({ classRoomId, setClassRoomId }) {
+    const [className, setClassName] = useState("");
+    const [modalOpen, setModalOpen] = useState(false);
+    const [allClasses, setAllClasses] = useState([]);
 
     useEffect(() => {
-        const getClassroomCode = async () => {
-            setClassCode(localStorage.getItem("classRoomId"));
+        const fetchClassName = async () => {
+            try {
+                const response = await fetch(`/classroom-name?classRoomId=${classRoomId}`);
+                const data = await response.json();
+                setClassName(data.name);
+            } catch (error) {
+                console.error("Error fetching the classroom name:", error);
+                setClassName("No name found for classroom");
+            }
         };
 
-        getClassroomCode();
+        fetchClassName();
+    }, [classRoomId]);
+
+    useEffect(() => {
+        const fetchAllNames = async () => {
+            try {
+                const response = await fetch(`/classroom-name?allClasses=${true}`);
+                const data = await response.json();
+                setAllClasses(data.classes);
+            } catch (error) {
+                console.error("Error fetching all classrooms:", error);
+            }
+        };
+
+        fetchAllNames();
     }, []);
 
+    const toggleDropdown = () => {
+        setModalOpen(true);
+    };
+
+    const handleClassroomSelect = (classRoomId) => {
+        localStorage.setItem("classRoomId", classRoomId);
+        setClassRoomId(classRoomId);
+        setModalOpen(false);
+    };
+
     return (
-        <h4 className="heading-style-h4-half primary">{classCode}</h4>
+        <>
+            <div className="card-header d-flex align-items-center justify-content-center w-100 position-relative">
+                <h4 className="heading-style-h4-half">{className}</h4>
+                <i 
+                className="bi bi-chevron-down switch-classroom-icon ms-3"
+                onClick={toggleDropdown}
+                />
+            </div>
+
+            <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
+                <DialogContent>
+                    <div className="scroll-wrapper">
+                        { allClasses.map((classroom, index) => (
+                            <div className="card" key={index}>
+                                <div className="card-body p-4">
+                                    <button className="navigation-item" onClick={() => handleClassroomSelect(classroom.classRoomId)}>{classroom.name}</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </DialogContent>
+                <DialogActions sx={{justifyContent: "center"}}>
+                <Button onClick={() => setModalOpen(false)} style={{color: "#000000"}}>
+                    Cancel
+                </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 }
 
-function CardHeader({text}) {
+function ClassroomCodeCardBody({ classRoomId }) {
+    const [classCode, setClassCode] = useState("");
+
+    useEffect(() => {
+        const getClassroomCode = () => {
+            const code = classRoomId;
+            setClassCode(code || "No classroom code available");
+        };
+
+        getClassroomCode();
+    }, [classRoomId]);
+
     return (
-        <div className="card-header">
+        <div className="card-body">
+            <h5 className="heading-style-h5 primary">{classCode}</h5>
+        </div>
+    );
+}
+
+function CardHeader({ text }) {
+    return (
+        <div className="card-header d-flex align-items-center justify-content-center w-100">
             <h4 className="heading-style-h4-half">{text}</h4>
         </div>
     );
 }
 
-function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentData, setClassStats }) {
+function Table({ classRoomId, bringBackToLogin, setSelectedStudent, setModalOpen, setStudentData, setClassStats }) {
     const [studentList, setStudentList] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [sortConfig, setSortConfig] = useState({ key: "lastname", direction: "ascending" });
@@ -166,7 +246,7 @@ function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentD
     useEffect(() => {
         const getStudentList = async () => {
             try {
-                const response = await fetch("/student-list");
+                const response = await fetch(`/student-list?classRoomId=${classRoomId}`);
                 if (response.status === 401) {
                     bringBackToLogin();
                     return;
@@ -200,7 +280,7 @@ function Table({ bringBackToLogin, setSelectedStudent, setModalOpen, setStudentD
         };
     
         getStudentList();
-    }, []);
+    }, [classRoomId]);
     
     const calculateStats = (studentList) => {
         if (studentList.length === 0) return;

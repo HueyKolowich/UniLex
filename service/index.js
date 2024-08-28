@@ -77,6 +77,11 @@ app.post('/login', async (req, res) => {
         secure: true,
         sameSite: 'Strict',
       });
+
+      if (user.role === "teacher" && Array.isArray(user.classRoomId)) {
+        user.classRoomId = user.classRoomId[0];
+      }
+
       res.status(200).send({ msg: 'Success', role: user.role, username: user.username, classRoomId: user.classRoomId });
       return;
     }
@@ -233,7 +238,11 @@ app.post('/prompts', async (req, res) => {
       return res.status(400).json({ error: 'Invalid promptsList format' });
     }
 
-    await DB.addPrompts(classRoomId, promptsList);
+    const classRoomIds = Array.isArray(classRoomId) ? classRoomId : [classRoomId];
+
+    await Promise.all(classRoomIds.map(async (id) => {
+      await DB.addPrompts(id, promptsList);
+    }));
 
     res.status(200).json({ message: 'Prompts added successfully' });
   } catch (error) {
@@ -371,21 +380,27 @@ app.post('/submissions', async (req, res) => {
 });
 
 app.get('/student-list', async (req, res) => {
+  const classRoomId = req.query.classRoomId;
+
   try {
-    const studentUsernameList = await DB.getStudentUsernamesByClassRoomId(req.user.classRoomId);
+    if (classRoomId) {
+      const studentUsernameList = await DB.getStudentUsernamesByClassRoomId(classRoomId);
 
-    const studentListPromises = studentUsernameList.map(async (username) => {
-      const student = await DB.getUser(username);
-      if (student) {
-        return { username: student.username, firstname: student.firstname, lastname: student.lastname };
-      }
-      return null;
-    });
+      const studentListPromises = studentUsernameList.map(async (username) => {
+        const student = await DB.getUser(username);
+        if (student) {
+          return { username: student.username, firstname: student.firstname, lastname: student.lastname };
+        }
+        return null;
+      });
 
-    let studentList = await Promise.all(studentListPromises);
-    studentList = studentList.filter((student) => student !== null);
+      let studentList = await Promise.all(studentListPromises);
+      studentList = studentList.filter((student) => student !== null);
 
-    res.status(200).json({ studentList: studentList });
+      res.status(200).json({ studentList: studentList });  
+    } else {
+      throw new Error("No classRoomId found in request");
+    }
   } catch (error) {
     console.error("Error in getting student list: ", error);
     res.status(500).json({ error: "An error occurred while getting the list of students for this classroom" });
@@ -408,6 +423,28 @@ app.get('/student-table-info', async (req, res) => {
   } catch (error) {
     console.error("Error in getting the comfortRating for user:", error);
     res.status(500).json({ error: "An error occurred while getting the comfortRating for the user" });
+  }
+});
+
+app.get('/classroom-name', async (req, res) => {
+  const classRoomId = req.query.classRoomId;
+  const allClasses = req.query.allClasses;
+
+  try {
+    if (classRoomId) {
+      const classInfo = await DB.getClassInfo(classRoomId);
+
+      res.status(200).json({ name: classInfo.name });
+    } else if (allClasses) {
+      const classes = await DB.getClasses(req.user.username);
+
+      res.status(200).json({ classes: classes });
+    } else {
+      res.status(400).json({ error: "No specified classRoomId in request", name: "No name found for classroom" });
+    }
+  } catch (error) {
+    console.error("Error in getting the name for classroom:", error);
+    res.status(500).json({ error: "An error occurred while getting the name for the classroom", name: "No name found for classroom" });
   }
 });
 

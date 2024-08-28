@@ -103,7 +103,7 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
                     "lastname": formattedLast,
                     "phone": formattedPhone,
                     "role": formattedRole,
-                    "classRoomId": classRoomId,
+                    "classRoomId": formattedClassRoomId,
                     "native": native,
                     "target": target,
                     "location": formattedLocation

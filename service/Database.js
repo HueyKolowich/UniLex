@@ -428,13 +428,36 @@ async function getClassInfo(classRoomId) {
     
     const classInfo = await classroomsCollection.findOne(filter);
 
-    if (classInfo.native && classInfo.target) {
-      return { native: classInfo.native, target: classInfo.target, teacher: !!classInfo.teacher };
+    if (classInfo.native && classInfo.target && classInfo.name) {
+      return { 
+        native: classInfo.native, 
+        target: classInfo.target, 
+        teacher: !!classInfo.teacher,
+        name: classInfo.name
+      };
     } else {
-      return { native: null, target: null, teacher: null };
+      return { 
+        native: null, 
+        target: null, 
+        teacher: null,
+        name: null 
+      };
     }
   } catch (error) {
     console.error("Error setting getting info for classroom:", error);
+    throw error;
+  }
+}
+
+async function getClasses(username) {
+  try {
+    const filter = { teacher: username };
+
+    const classes = await classroomsCollection.find(filter).toArray();
+
+    return classes;
+  } catch (error) {
+    console.error("Error setting getting info for all classrooms:", error);
     throw error;
   }
 }
@@ -463,5 +486,6 @@ module.exports = {
   getAverageHelpfulnessScore,
   setRatingForOtherStudent, 
   getStudentUsernamesByClassRoomId,
-  getClassInfo
+  getClassInfo,
+  getClasses
 };
