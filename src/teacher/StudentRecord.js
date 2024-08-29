@@ -1,4 +1,4 @@
-import formatGMTDate from "./FormatGMTDate";
+import formatGMTDate from "../shared/FormatGMTDate";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 
 function StudentRecord({ modalOpen, setModalOpen, selectedStudent, studentData }) {

@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogActions, Button } from "@mui/material";
 import AssignmentConfigurationBody from "./AssignmentConfig";
 import AssignmentView from "./AssignmentView";
 import StudentRecord from "./StudentRecord";
-import formatGMTDate from "./FormatGMTDate";
+import formatGMTDate from "../shared/FormatGMTDate";
 
 function TMCBody({ localStorageClassRoomId, bringBackToLogin }) {
     const [classRoomId, setClassRoomId] = useState(localStorageClassRoomId);

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+
 import CalendarBody from "./CalendarBody";
 import CollabBody from "./Collab";
+import formatGMTDate from "../shared/FormatGMTDate";
 
 function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveRef, bringBackToLogin }) {
     const [isMeetingEntryDisabled, setIsMeetingEntryDisabled] = useState(true);
     const [soughtUsername, setSoughtUsername] = useState("");
+    const [nextMeeting, setNextMeeting] = useState(null);
 
     useEffect(() => {
         const checkForMeetings = async () => {
@@ -15,8 +18,18 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
                 }
 
                 const data = await response.json();
+
                 setIsMeetingEntryDisabled(!data.result);
                 setSoughtUsername(data.soughtUsername);
+
+                if (data.nextEvent) {
+                    const { date, time } = formatGMTDate(new Date(data.nextEvent.start));
+
+                    setNextMeeting({ date, time });
+                } else {
+                    setNextMeeting(null);
+                }
+                
             } catch (error) {
                 console.error("Error checking if there is a current meeting scheduled:", error);
             }
@@ -53,7 +66,7 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
                         headerText={"Conversation"} 
                         whichModule={"collab"} 
                         isDisabled={isMeetingEntryDisabled}
-                        displayCardText={"No conversation currently scheduled"}
+                        displayCardText={{ msg: "Next converstation scheduled for: ", nextMeeting }}
                     />
                 </div>
             break;
@@ -80,12 +93,16 @@ function ModuleCard({ setStudentModule, headerText, whichModule, isDisabled, dis
                     isDisabled={isDisabled}
                     whichIcon={whichModule === "calendar" ? "bi bi-calendar4-week" : "bi bi-play"}
                 />
-                {displayCardText && isDisabled && (
-                    <p>{displayCardText}</p>
-                )}
+                {displayCardText && isDisabled ? (
+                    displayCardText.nextMeeting ? (
+                        <p>{displayCardText.msg} {displayCardText.nextMeeting?.date} at {displayCardText.nextMeeting?.time}</p>
+                    ) : (
+                        <p>You have no conversations scheduled</p>
+                    )
+                ) : null}
             </div>            
         </div>
-    );
+    );    
 }
 
 function ModuleCardBodyButton({ enterModule, isDisabled, whichIcon }) {
