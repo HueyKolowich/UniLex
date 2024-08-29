@@ -165,7 +165,7 @@ app.get('/current-meeting-scheduled', async (req, res) => {
       const start = new Date(event.start);
       const end = new Date(event.end);
 
-      if (start <= now && now <= end) {
+      if (start <= now && now <= end || (start - now <= 300000 && now < start)) {
         currentEvent = event;
         otherParticipantUsername = event.participants.filter((username) => username !== req.user.username)[0];
       }
