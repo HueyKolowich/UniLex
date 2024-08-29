@@ -279,7 +279,7 @@ async function removeNameFromEventParticipantList(calEventId) {
         status: "waiting"
       },
       $pop: {
-        participants: -1
+        participants: 1
       }
     };
 
