@@ -5,9 +5,56 @@ import CollabBody from "./Collab";
 import formatGMTDate from "../shared/FormatGMTDate";
 
 function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveRef, bringBackToLogin }) {
-    const [isMeetingEntryDisabled, setIsMeetingEntryDisabled] = useState(true);
     const [soughtUsername, setSoughtUsername] = useState("");
+    const [isMeetingEntryDisabled, setIsMeetingEntryDisabled] = useState(true);
+
+    let bodyContent;
+    switch (studentModule) {
+        case "calendar":
+            bodyContent = <CalendarBody bringBackToLogin={bringBackToLogin} />;
+            break;
+        case "collab":
+            bodyContent = <CollabBody 
+                collabSessionRef={collabSessionRef} 
+                leaveRef={leaveRef} 
+                bringBackToLogin={bringBackToLogin}
+                setStudentModule={setStudentModule}
+                soughtUsername={soughtUsername}
+                />;
+            break;
+        default:
+            bodyContent = 
+                <div className="student-body d-flex align-items-center justify-content-around">
+                    <ModuleCard 
+                        setStudentModule={setStudentModule} 
+                        headerText={"Calendar"} 
+                        whichModule={"calendar"} 
+                        isDisabled={false}
+                    />
+                    <ModuleCard 
+                        setStudentModule={setStudentModule} 
+                        headerText={"Conversation"} 
+                        whichModule={"collab"}
+                        setSoughtUsername={setSoughtUsername} 
+                        isDisabled={isMeetingEntryDisabled}
+                        setIsMeetingEntryDisabled={setIsMeetingEntryDisabled}
+                        bringBackToLogin={bringBackToLogin}
+                    />
+                </div>
+            break;
+    }
+
+    return (
+        <div className="container-fluid">
+            {bodyContent}
+        </div>
+    );
+}
+  
+function ModuleCard({ setStudentModule, headerText, whichModule, setSoughtUsername, isDisabled, setIsMeetingEntryDisabled, bringBackToLogin }) {
     const [nextMeeting, setNextMeeting] = useState(null);
+
+    const displayCardText = { msg: "Next converstation scheduled for: ", nextMeeting };
 
     useEffect(() => {
         const checkForMeetings = async () => {
@@ -38,48 +85,6 @@ function StudentBody({ studentModule, setStudentModule, collabSessionRef, leaveR
         checkForMeetings();
     });
 
-    let bodyContent;
-    switch (studentModule) {
-        case "calendar":
-            bodyContent = <CalendarBody bringBackToLogin={bringBackToLogin} />;
-            break;
-        case "collab":
-            bodyContent = <CollabBody 
-                collabSessionRef={collabSessionRef} 
-                leaveRef={leaveRef} 
-                bringBackToLogin={bringBackToLogin}
-                setStudentModule={setStudentModule}
-                soughtUsername={soughtUsername}
-                />;
-            break;
-        default:
-            bodyContent = 
-                <div className="student-body d-flex align-items-center justify-content-around">
-                    <ModuleCard 
-                        setStudentModule={setStudentModule} 
-                        headerText={"Calendar"} 
-                        whichModule={"calendar"} 
-                        isDisabled={false}
-                    />
-                    <ModuleCard 
-                        setStudentModule={setStudentModule} 
-                        headerText={"Conversation"} 
-                        whichModule={"collab"} 
-                        isDisabled={isMeetingEntryDisabled}
-                        displayCardText={{ msg: "Next converstation scheduled for: ", nextMeeting }}
-                    />
-                </div>
-            break;
-    }
-
-    return (
-        <div className="container-fluid">
-            {bodyContent}
-        </div>
-    );
-}
-  
-function ModuleCard({ setStudentModule, headerText, whichModule, isDisabled, displayCardText }) {
     function enterModule() {
         setStudentModule(whichModule);
     }

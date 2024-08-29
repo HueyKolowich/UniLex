@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogActions, Button } from "@mui/material";
 import Countdown from 'react-countdown';
 import CollabSession from './CollabSession.js';
 import ReflectionForm from './ReflectionForm.js';
@@ -15,6 +16,7 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
     const [clientId, setClientId] = useState(null);
     const [meetingOver, setMeetingOver] = useState(false);
     const [otherParticipantUsername, setOtherParticipantUsername] = useState("");
+    const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
         const initializeSession = async () => {
@@ -77,19 +79,25 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
                 break;
             case "MeetingOver":
                 setOtherParticipantUsername(messageObject.otherParticipantUsername);
-                setMeetingOver(true);
-
-                if (collabSessionRef.current && collabSessionRef.current.socket) {
-                    collabSessionRef.current.socket.close();
-                  }
-
-                if (leaveRef.current) {
-                    leaveRef.current();
-                  }
+                setModalOpen(true);
                 break;
             default:
                 console.warn('Unhandled message type:', messageObject.type);
         }
+    };
+
+    const handleMeetingClose = () => {
+        setMeetingOver(true);
+
+        if (collabSessionRef.current && collabSessionRef.current.socket) {
+            collabSessionRef.current.socket.close();
+        }
+
+        if (leaveRef.current) {
+            leaveRef.current();
+        }
+
+        setModalOpen(false);
     };
 
     return (
@@ -111,6 +119,19 @@ function CollabBody({ collabSessionRef, leaveRef, bringBackToLogin, setStudentMo
                             clientWithLock={clientWithLock}
                             clientId={clientId}
                         />
+
+                        <Dialog open={modalOpen} onClose={() => handleMeetingClose()}>
+                            <DialogContent>
+                            <div className="text-center">
+                                <h3>The conversation has ended!</h3>
+                            </div>
+                            </DialogContent>
+                            <DialogActions sx={{justifyContent: "center"}}>
+                            <Button onClick={() => handleMeetingClose()} sx={{color: "#000000"}}>
+                                Okay
+                            </Button>
+                            </DialogActions>
+                        </Dialog>
                     </div>
                 ) : (
                     <div className="student-body d-flex flex-column justify-content-center align-items-center">
