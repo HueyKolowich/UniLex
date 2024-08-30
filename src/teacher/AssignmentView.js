@@ -19,7 +19,7 @@ function AssignmentView() {
     }, []);
 
     return (
-        <div className="mt-4 mx-4">
+        <div className="mt-2 mx-4">
             <h4 className="heading-style-h4-half text-center primary">Current Assignment</h4>
             <div className="scroll-wrapper">
                 {prompts.map((prompt) => {

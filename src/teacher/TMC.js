@@ -29,7 +29,7 @@ function TMCBody({ localStorageClassRoomId, bringBackToLogin }) {
                 <div className="container-fluid">
                     <div className="row my-3 mx-2">
                         <div className="col">
-                            <div className="d-flex flex-column mb-4">
+                            <div className="d-flex flex-column my-auto mb-4">
                                 <ClassStats classStats={classStats} />
                                 <Table
                                     classRoomId={classRoomId} 
@@ -63,12 +63,12 @@ function ClassStats({ classStats }) {
     const { avgComfort, avgHelpfulness, conversationPercentage } = classStats;
 
     return (
-        <div className="d-flex justify-content-evenly text-center mt-1 mb-3">
+        <div className="d-flex justify-content-evenly text-center mb-3">
             <div className="card class-stats mx-3">
                 <div className="card-header">
                     Avg. Helpfulness
                 </div>
-                <div className="card-body primary">
+                <div className="card-body pt-0 pb-2">
                     {avgHelpfulness.toFixed(1)}
                 </div>
             </div>
@@ -76,7 +76,7 @@ function ClassStats({ classStats }) {
                 <div className="card-header">
                     Avg. Comfort
                 </div>
-                <div className="card-body">
+                <div className="card-body pt-0 pb-2">
                     {avgComfort.toFixed(1)}
                 </div>
             </div>
@@ -84,7 +84,7 @@ function ClassStats({ classStats }) {
                 <div className="card-header">
                     Weekly Participation Rate
                 </div>
-                <div className="card-body">
+                <div className="card-body pt-0 pb-2">
                     {conversationPercentage.toFixed(1)}%
                 </div>
             </div>

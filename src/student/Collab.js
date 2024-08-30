@@ -159,12 +159,12 @@ function PromptHelps({ promptHelps }) {
     return (
          isVisible ? (
             <div className="card suggestions">
-                <div className="card-header text-center">
+                <div className="card-header text-center pb-0">
                     <h6 className="heading-style-h6 primary">Suggestions</h6>
                 </div>
-                <div className="card-body text-center d-flex flex-column justify-content-center">
+                <div className="card-body text-center d-flex flex-column justify-content-center pt-0">
                     {promptHelps.map((help, index) => (
-                        <p className="my-3" key={index}>{help}</p>
+                        <p className="my-auto" key={index}>{help}</p>
                     ))}
                 </div>
             </div>
@@ -204,7 +204,7 @@ function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, client
     };
 
     return (
-        <div className="mt-4">
+        <div className="mt-2">
             { currentPrompt.prompt ? (
                 <div className="d-flex align-items-center my-3">
                     <div className="d-flex justify-content-center align-items-center ms-4 me-5" style={{height: "112px"}}>
@@ -218,7 +218,7 @@ function DiscussionPrompt({ currentPrompt, collabSession, clientWithLock, client
                         <div className="card-header text-center heading-style-h5">
                             <h5 className="heading-style-h5 primary">Discuss the following in {currentPrompt.language} together:</h5>
                         </div>
-                        <div className="card-body text-center">
+                        <div className="card-body text-center pt-0">
                             <DiscussionPromptText prompt={currentPrompt.prompt} />
                         </div>
                     </div>

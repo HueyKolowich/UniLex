@@ -196,6 +196,7 @@ html, body {
 .video-box {
     width: 100% !important;
     max-width: 480px;
+    max-height: 50vh;
     border-radius: 6px;
     box-shadow:
         0.3em 0.3em 1em rgba(119, 119, 119, 0.5);
@@ -205,7 +206,7 @@ html, body {
     width: 100% !important;
     height: 100% !important;
     max-width: 240px;
-    max-height: 360px;
+    max-height: 50vh;
 }
 
 .spinner-border {
