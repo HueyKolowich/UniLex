@@ -1,5 +1,7 @@
 require('dotenv').config({ path: __dirname + '/.env' });
 
+const isDev = true; // IMPORTANT: When pushed to dist folder this must be changed to false
+
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
@@ -20,7 +22,7 @@ const authCookieName = 'authToken';
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static('../build')); // IMPORTANT: When pushed to dist folder this must be changed to './build'
+app.use(express.static(isDev ? '../build' : './build'));
 
 app.use(morgan('combined'));
 
@@ -74,7 +76,7 @@ app.post('/login', async (req, res) => {
       res.cookie(authCookieName, newToken, {
         httpOnly: true,
         maxAge: 9000000,
-        secure: true,
+        secure: !isDev,
         sameSite: 'Strict',
       });
 
