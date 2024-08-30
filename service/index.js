@@ -23,7 +23,7 @@ const authCookieName = 'authToken';
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(isDev ? '../build' : './build'));
+app.use(express.static(path.join(__dirname, '../build')));
 
 app.use(morgan('combined'));
 
