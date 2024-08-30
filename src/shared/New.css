@@ -149,7 +149,9 @@ html, body {
 /* Navigation */
 .navigation-item {
     background: none;
+    color: #000000;
     border: none;
+    text-decoration: none;
 }
 .navigation-item:hover {
     color: #D2E8C7;

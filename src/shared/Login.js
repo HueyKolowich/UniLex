@@ -179,6 +179,11 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
                     </button>
                 </div>
             </div>
+
+            <div className="text-center mb-3">
+                <a className="navigation-item" href="/about">About</a>
+                <p>&copy; 2024 UniLex. All Rights Reserved.</p>
+            </div>
         </div>
     );    
 }

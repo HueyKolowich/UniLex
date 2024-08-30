@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" href="/unilex-favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UniLex</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #000000;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        header {
+            background-color: #ffffff;
+            color: #000000;
+
+            .header-centered {
+                height: 80vh;
+                display: flex;
+                align-items: center;
+            }
+
+            h1 {
+                color: #F59799;;
+                text-align: left;
+                font-size: 10rem !important;
+                font-weight: 500 !important;
+                margin-block-start: 0rem !important;
+                margin-block-end: 0rem !important;
+                padding: 0rem 4rem;
+                padding-top: 0rem;
+                padding-bottom: 2rem;
+            }
+            p {
+                text-align: right;
+                font-size: 3rem !important;
+                font-weight: 300 !important;
+                margin-block-start: 0rem !important;
+                margin-block-end: 0rem !important;
+                padding: 0rem 4rem;
+                padding-top: 2rem;
+                padding-bottom: 0rem;
+            }
+        }
+        nav {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+            padding: 2rem;
+        }
+        nav a {
+            float: left;
+            display: block;
+            color: #000000;
+            text-align: center;
+            padding: 5px 20px;
+            text-decoration: none;
+            background: none;
+            border: none;
+        }
+        nav a:hover {
+            color: #D2E8C7;
+        }
+        .container {
+            padding: 20px;
+        }
+        footer {
+            background: none;
+            color: #000000;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px;
+        }
+        .section {
+            display: flex;
+            .card {
+                text-align: center;
+                max-width: 300px;
+                margin: 50px;
+                
+                p {
+                    margin: 0 !important;
+                }
+            }
+        }
+        .section-left {
+            justify-content: start;
+        }
+        .section-right {
+            justify-content: end;
+        }
+        .card {
+            font-size: 1.5rem;
+            background-color: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+        .fade-in {
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="#about">About</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#contact">Contact</a>
+        <a href="#policy">Refund Policy</a>
+        <a href="/" style="color: #F59799;">Sign Up</a>
+    </nav>
+
+    <div class="header-centered">
+        <div>
+            <p>We're on a mission to bring the world together through the collaborative learning of language</p>
+            <h1>UniLex</h1>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <section id="about">
+        <div class="section section-right fade-in">
+            <div class="card">
+                <p>At UniLex, we're passionate about breaking down language barriers and fostering global connections through collaborative language learning. In an increasingly interconnected world, effective communication is key to understanding and collaboration across cultures. By bringing together language learners and native speakers, we create unique opportunities for meaningful interaction and cultural exchange.</p>
+            </div>
+            <div class="card">
+                <p>Our goal is to empower individuals to confidently express themselves and connect with others worldwide. Language is not just a tool for communication—it's a gateway to new perspectives, experiences, and friendships. At UniLex, we believe that by facilitating these connections, we're not just teaching languages; we're building bridges between people and cultures.</p>
+            </div>
+        </div>
+        <div class="section section-left fade-in">
+            <div class="card">
+                <p>Why is this important? Language learning goes beyond acquiring new words and grammar; it's about embracing diversity and cultivating empathy. When you practice with native speakers, you gain real-world insights and cultural nuances that enhance your learning experience and broaden your worldview. Our platform provides a space where learners and speakers can share knowledge, experiences, and ideas, making language learning a collaborative and enriching journey.</p>
+            </div>
+            <div class="card">
+                <p>We're excited to be at the forefront of this global movement. Our community is vibrant and dynamic, bringing together people from all walks of life who share a common goal: to connect, learn, and grow. Join us at UniLex and be a part of something truly transformative—experience the joy of language learning and the thrill of connecting with people from around the world. Together, we can make the world a smaller, more understanding place, one conversation at a time.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing">
+        <div class="card">
+            <h2>Pricing</h2>
+            <p>Currently, our service is offered at a flat (per semester) rate. However, feel free to contact us for a custom quote.</p>
+            <ul>
+                <li>Semester access to UniLex: $75.00</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="card">
+            <h2>Contact Us</h2>
+            <p>Phone: (385) 482-5938</p>
+            <p>Email: huey@kolowich.org</p>
+        </div>
+    </section>
+
+    <section id="policy">
+        <div class="card">
+            <h2>Refund and Cancellation Policy</h2>
+            <p>We strive for 100% customer satisfaction. If you are not satisfied with our products or services, please contact us within 30 days for a full refund or cancellation. Terms and conditions apply.</p>
+        </div>
+    </section>
+
+    <section id="terms">
+        <div class="card">
+            <h2>Terms of Service</h2>
+            <p>By using this website and our services, you agree to the following terms and conditions:</p>
+            <p>Acceptance of Terms - By accessing and using our website, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms, please do not use our services.</p>
+            <p>Use of Services - Our platform allows language learners to connect with native speakers for conversation practice. You agree to use our services only for lawful purposes and in a manner that does not infringe upon the rights of others.</p>
+            <p>Account Responsibilities - You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account.</p>
+            <p>User Conduct - You agree to engage with other users respectfully and professionally. Any form of harassment, discrimination, or inappropriate behavior is prohibited and may result in the suspension or termination of your account.</p>
+            <p>Content and Intellectual Property - All content provided on our website, including text, graphics, and logos, is the property of our company and protected by intellectual property laws. You may not reproduce, distribute, or create derivative works from our content without explicit permission.</p>
+            <p>Modifications to Services - We reserve the right to modify or discontinue our services at any time without prior notice. We will not be liable for any changes or interruptions in service.</p>
+            <p>Limitation of Liability - Our liability for any claims arising from your use of our services is limited to the maximum extent permitted by law. We are not responsible for any indirect, incidental, or consequential damages.</p>
+            <p>Governing Law - These Terms of Service are governed by the laws of Utah. Any disputes arising from these terms will be resolved in the courts of Utah.</p>              
+            <p>Changes to Terms - We may update these Terms of Service from time to time. The updated terms will be posted on our website, and your continued use of our services constitutes acceptance of the revised terms.</p>
+        </div>
+    </section>
+
+    <section id="privacy">
+        <div class="card">
+            <h2>Privacy Policy</h2>
+            <p>We take your privacy seriously. This policy explains how we collect, use, and protect your personal information:</p>
+
+            <p>Information Collection - We collect personal information that you provide to us when you create an account, communicate with us, or use our services. This may include your name, email address, and other relevant details.</p>
+            <p>Use of Information - We use your personal information to provide and improve our services, communicate with you, and personalize your experience. We may also use your information for marketing purposes, with your consent.</p>
+            <p>Data Security - We implement industry-standard security measures to protect your personal information from unauthorized access, alteration, or disclosure. However, no method of transmission over the internet or electronic storage is completely secure.</p>
+            <p>Data Sharing - We do not sell, trade, or otherwise transfer your personal information to outside parties, except as required by law or with your consent. We may share information with service providers who assist us in operating our website and services.</p>
+            <p>Cookies - Our website may use cookies to enhance your experience and analyze site traffic. You can choose to disable cookies through your browser settings, but this may affect the functionality of our website.</p>
+            <p>Your Rights - You have the right to access, correct, or delete your personal information. If you wish to exercise these rights, please contact us using the information listed above.</p>
+            <p>Changes to Privacy Policy - We may update our Privacy Policy from time to time. The updated policy will be posted on our website, and your continued use of our services constitutes acceptance of the revised policy.</p>
+        </div>
+    </section>
+</div>
+
+<footer>
+    <p>&copy; 2024 UniLex. All Rights Reserved.</p>
+</footer>
+
+<script src="fadeIn.js"></script>
+
+</body>
+</html>

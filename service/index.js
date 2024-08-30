@@ -1,8 +1,9 @@
 require('dotenv').config({ path: __dirname + '/.env' });
 
-const isDev = true; // IMPORTANT: When pushed to dist folder this must be changed to false
+const isDev = process.env.NODE_ENV === 'development';
 
 const express = require('express');
+const path = require('path');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -27,6 +28,12 @@ app.use(express.static(isDev ? '../build' : './build'));
 app.use(morgan('combined'));
 
 app.use(helmet());
+
+app.get('/about', (req, res) => {
+  const filePath = 'build/about.html';
+
+  res.sendFile(filePath, { root: path.join(__dirname, '..') });
+});
 
 app.get('/check-auth', (req, res) => {
   const token = req.cookies[authCookieName];
