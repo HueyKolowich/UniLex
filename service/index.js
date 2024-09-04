@@ -13,6 +13,7 @@ const { sanitzeJSONResponseObjects } = require('./lib/SanitizeResponses.js');
 const OpenAI = require('openai');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const stripe = require('stripe')(process.env.STRIPE_API_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT;
@@ -33,6 +34,14 @@ app.get('/about', (req, res) => {
   const filePath = 'build/about.html';
 
   res.sendFile(filePath, { root: path.join(__dirname, '..') });
+});
+
+app.get('/payment-return', (req, res) => {
+  const filePath = 'build/payment-return.html';
+
+  res.sendFile(filePath, { 
+    root: path.join(__dirname, '..'),
+  });
 });
 
 app.get('/check-auth', (req, res) => {
@@ -66,8 +75,9 @@ app.post('/register', async (req, res) => {
     );
 
     await DB.addUserToClassroom(req.body.classRoomId, req.body.username, req.body.role);
+    const paymentRequired = await DB.checkPaymentRequirementForClassroom(req.body.classRoomId);
 
-    res.status(201).send({ msg: "Success", id: user._id });
+    res.status(201).send({ msg: "Success", id: user._id, paymentRequired: paymentRequired });
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).send({ msg: "Internal server error" });
@@ -78,6 +88,12 @@ app.post('/login', async (req, res) => {
   const user = await DB.getUser(req.body.username);
   if (user) {
     if (await bcrypt.compare(req.body.password, user.password)) {
+      const paymentStatus = await DB.getPaymentStatus(req.body.username);
+
+      if (paymentStatus !== 'paid') {
+        return res.status(403).send({ msg: 'Payment required' });
+      }
+
       const newToken = await DB.generateNewSessionAuthToken(req.body.username);
 
       res.cookie(authCookieName, newToken, {
@@ -118,6 +134,71 @@ app.get('/getClassInfo', async (req, res) => {
   } catch (error) {
     console.error("Error in getting the clasroom info:", error);
     res.status(500).json({ error: "An error occurred while getting the clasroom info" });
+  }
+});
+
+app.post('/create-checkout-session', express.urlencoded({ extended: true }), async (req, res) => {
+  try {
+    const username = req.body.username;
+
+    if (username) {
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price: process.env.STRIPE_PRICE_ID,
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: 'http://localhost:3000/payment-return?success=true',
+        cancel_url: 'http://localhost:3000/payment-return?canceled=true',
+        automatic_tax: {enabled: true},
+      });
+  
+      if (DB.setCheckoutSession(username, session.id)) {
+        res.redirect(303, session.url);
+      } else {
+        res.status(500).json({ error: "The server was not able to being your payment process. Please contact us using the information found on our about page or try again" });
+      }
+    } else {
+      res.status(400).json({ msg: "No username associated with this payment request" });
+    }
+  } catch (error) {
+    console.error("Error creating checkout session:", error);
+    res.status(500).json({ error: "The server was not able to handle your payment correctly. Please contact us using the information found on our about page or try again" });
+  }
+});
+
+app.post('/payment-status', async (req, res) => {
+  try {
+    const { username, noPaymentRequired } = req.body;
+
+    if (!username) {
+      return res.status(400).json({ error: 'Username is required' });
+    }
+
+    if (noPaymentRequired) {
+      await DB.setPaymentStatus(username, 'paid');
+    } else {
+      const checkoutSession = await DB.getCheckoutSession(username);
+
+      if (!checkoutSession) {
+        return res.status(404).json({ error: 'Checkout session not found' });
+      }
+
+      const session = await stripe.checkout.sessions.retrieve(checkoutSession);
+
+      if (!session) {
+        return res.status(500).json({ error: 'Failed to retrieve session from Stripe' });
+      }
+
+      await DB.setPaymentStatus(username, session.payment_status);
+    }
+
+    res.status(200).json({ message: 'Payment status updated successfully' });
+  } catch (error) {
+    console.error("Error processing payment status:", error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

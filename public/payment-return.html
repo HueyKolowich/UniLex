@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/unilex-favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Status</title>
+  <style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+        color: #000000;
+        max-width: 100%;
+        height: 100vh;
+        overflow-x: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .msg-container {
+        font-size: 2rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        max-width: 75vh;
+
+        a {
+            color: #F59799;
+            text-decoration: none;
+            background: none;
+            border: none;
+        }
+        a:hover {
+            color: #D2E8C7;
+        }
+    }
+  </style>
+</head>
+<body>
+    <div class="msg-container">
+        <p id="message"></p>
+        <a href="/">Back</a>
+    </div>
+
+  <script src="payment-status.js"></script>
+</body>
+</html>

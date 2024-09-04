@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import pages from "./Pages";
+import ProductDisplay from "./Payment";
 
 function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
     const [username, setUsername] = useState("");
@@ -14,6 +15,7 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
     const [classRoomId, setClassRoomId] = useState("");
     const [isRegistering, setIsRegistering] = useState(false);
     const [incorrectPassword, setIncorrectPassword] = useState(false);
+    const [isPaying, setIsPaying] = useState(false);
 
     async function authenticate() {
         try {
@@ -29,6 +31,9 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
             });
             if (authenticationResponse.status === 401) {
                 setIncorrectPassword(true);
+            } else if (authenticationResponse.status === 403) {
+                localStorage.setItem("username", username);
+                setIsPaying(true);
             }
 
             const authenticationResult = await authenticationResponse.json();
@@ -77,6 +82,8 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
         }
 
         try {
+            localStorage.setItem("username", formattedUsername);
+
             const classRoomInfoResponse = await fetch(`/getClassInfo?classRoomId=${formattedClassRoomId}`);
             const {native, target, teacher} = await classRoomInfoResponse.json();
 
@@ -111,9 +118,24 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
             });
             const registrationResult = await registrationResponse.json();
 
-            if (registrationResult.msg.includes("Success")) {
+            if (registrationResult.msg.includes("Success")) {                
                 window.alert("Registration successful");
                 setIsRegistering(false);
+
+                if (formattedRole !== 'teacher' && registrationResult.paymentRequired) {
+                    setIsPaying(true);
+                } else {
+                    fetch('/payment-status', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username: username, noPaymentRequired: true })
+                        })
+                        .catch(error => {
+                        console.error("Error sending payment status request:", error);
+                    });
+                }
             } else if (registrationResponse.status === 409) {
                 window.alert("Username already in use. Please try again");
             } else if (registrationResponse.status === 406) {
@@ -124,60 +146,82 @@ function LoginBody({ setCurrentPage, setUserRole, setStudentModule }) {
         }
     }
 
+    useEffect(() => {
+        function handleKeyDown(event) {
+            if (event.key === "Enter") {
+                if (isRegistering) {
+                    register();
+                } else {
+                    authenticate();
+                }
+            }
+        }
+
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isRegistering, username, password, email, first, last, location, phone, role, classRoomId, confirmPassword]);
+
     return (
         <div className="container-fluid">
             <div className="d-flex align-items-center justify-content-around login-body">
-                {!isRegistering && (
-                    <div className="d-flex flex-column">
-                        <h2 className="heading-style-h2">
-                            Collaborative
-                        </h2>
-                        <h2 className="heading-style-h2">
-                            Language
-                        </h2>
-                        <h2 className="heading-style-h2">
-                            Learning
-                        </h2>
-                    </div>
-                )}
-                <div className="d-flex flex-column align-items-center mt-5">
-                    <form className="mb-1 text-center">
-                        {!isRegistering && incorrectPassword ? (
-                            <p className="incorrect-password">Username or Password is incorrect</p>
-                        ) : (
-                            <></>
-                        )}
-                        {isRegistering ? (
-                            <div className="row">
-                                <div className="col-md-6 d-flex flex-column">
-                                        <input type="text" id="name" placeholder="Username" className="text-field text-field-small mb-3" onChange={(ev) => setUsername(ev.target.value)} />
-                                        <input type="text" id="first" placeholder="First Name" className="text-field text-field-small mb-3" onChange={(ev) => setFirst(ev.target.value)} />
-                                        <input type="text" id="last" placeholder="Last Name" className="text-field text-field-small mb-3" onChange={(ev) => setLast(ev.target.value)} />
-                                        <input type="text" id="location" placeholder="Country or State" className="text-field text-field-small mb-3" onChange={(ev) => setLocation(ev.target.value)} />
-                                        <input type="email" id="email" placeholder="Email" className="text-field text-field-small mb-3" onChange={(ev) => setEmail(ev.target.value)} />
-                                </div>
-                                <div className="col-md-6 d-flex flex-column">
-                                        <input type="tel" id="phone" placeholder="Phone Number" className="text-field text-field-small mb-3" onChange={(ev) => setPhone(ev.target.value)} />
-                                        <input type="text" id="classCode" placeholder="Classroom Code" className="text-field text-field-small mb-3" onChange={(ev) => setClassRoomId(ev.target.value)} />
-                                        <input type="text" id="role" placeholder="Teacher/Student" className="text-field text-field-small mb-3" onChange={(ev) => setRole(ev.target.value)} />
-                                        <input type="password" id="password" placeholder="Password" className="text-field text-field-small mb-3" onChange={(ev) => setPassword(ev.target.value)} />
-                                        <input type="password" id="confirmPassword" placeholder="Confirm Password" className="text-field text-field-small mb-3" onChange={(ev) => setConfirmPassword(ev.target.value)} />
-                                </div>
-                            </div>
-                        ) : (
+                {isPaying ? (<ProductDisplay />) : (
+                    <>
+                        {!isRegistering && (
                             <div className="d-flex flex-column">
-                                <input type="text" id="name" placeholder="Username" className="text-field mb-3" onChange={(ev) => setUsername(ev.target.value)} />
-                                <input type="password" id="password" placeholder="Password" className="text-field mb-3" onChange={(ev) => setPassword(ev.target.value)} />
+                                <h2 className="heading-style-h2">
+                                    Collaborative
+                                </h2>
+                                <h2 className="heading-style-h2">
+                                    Language
+                                </h2>
+                                <h2 className="heading-style-h2">
+                                    Learning
+                                </h2>
                             </div>
                         )}
-                    </form>
-                    <button type="button" id="login" onClick={isRegistering ? register : authenticate} className="button">
-                        {isRegistering ? "Register" : "Login"}
-                    </button>
-                    <button type="button" onClick={() => setIsRegistering(!isRegistering)} id="registrationButton" className="btn btn-link registration-option pb-0 mb-0">
-                        {isRegistering ? "Already have an account? Login" : "Don't have an account? Register"}
-                    </button>
-                </div>
+                        <div className="d-flex flex-column align-items-center mt-5">
+                            <form className="mb-1 text-center">
+                                {!isRegistering && incorrectPassword ? (
+                                    <p className="incorrect-password">Username or Password is incorrect</p>
+                                ) : (
+                                    <></>
+                                )}
+                                {isRegistering ? (
+                                    <div className="row">
+                                        <div className="col-md-6 d-flex flex-column">
+                                                <input type="text" id="name" placeholder="Username" className="text-field text-field-small mb-3" onChange={(ev) => setUsername(ev.target.value)} />
+                                                <input type="text" id="first" placeholder="First Name" className="text-field text-field-small mb-3" onChange={(ev) => setFirst(ev.target.value)} />
+                                                <input type="text" id="last" placeholder="Last Name" className="text-field text-field-small mb-3" onChange={(ev) => setLast(ev.target.value)} />
+                                                <input type="text" id="location" placeholder="Country or State" className="text-field text-field-small mb-3" onChange={(ev) => setLocation(ev.target.value)} />
+                                                <input type="email" id="email" placeholder="Email" className="text-field text-field-small mb-3" onChange={(ev) => setEmail(ev.target.value)} />
+                                        </div>
+                                        <div className="col-md-6 d-flex flex-column">
+                                                <input type="tel" id="phone" placeholder="Phone Number" className="text-field text-field-small mb-3" onChange={(ev) => setPhone(ev.target.value)} />
+                                                <input type="text" id="classCode" placeholder="Classroom Code" className="text-field text-field-small mb-3" onChange={(ev) => setClassRoomId(ev.target.value)} />
+                                                <input type="text" id="role" placeholder="Teacher/Student" className="text-field text-field-small mb-3" onChange={(ev) => setRole(ev.target.value)} />
+                                                <input type="password" id="password" placeholder="Password" className="text-field text-field-small mb-3" onChange={(ev) => setPassword(ev.target.value)} />
+                                                <input type="password" id="confirmPassword" placeholder="Confirm Password" className="text-field text-field-small mb-3" onChange={(ev) => setConfirmPassword(ev.target.value)} />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="d-flex flex-column">
+                                        <input type="text" id="name" placeholder="Username" className="text-field mb-3" onChange={(ev) => setUsername(ev.target.value)} />
+                                        <input type="password" id="password" placeholder="Password" className="text-field mb-3" onChange={(ev) => setPassword(ev.target.value)} />
+                                    </div>
+                                )}
+                            </form>
+                            <button type="button" id="login" onClick={isRegistering ? register : authenticate} className="button">
+                                {isRegistering ? "Register" : "Login"}
+                            </button>
+                            <button type="button" onClick={() => setIsRegistering(!isRegistering)} id="registrationButton" className="btn btn-link registration-option pb-0 mb-0">
+                                {isRegistering ? "Already have an account? Login" : "Don't have an account? Register"}
+                            </button>
+                        </div>
+                    </>
+                )}
             </div>
 
             <div className="text-center mb-3">
