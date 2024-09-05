@@ -150,8 +150,8 @@ app.post('/create-checkout-session', express.urlencoded({ extended: true }), asy
           },
         ],
         mode: 'payment',
-        success_url: 'http://localhost:3000/payment-return?success=true',
-        cancel_url: 'http://localhost:3000/payment-return?canceled=true',
+        success_url: `${process.env.RETURN_URL}?success=true`,
+        cancel_url: `${process.env.RETURN_URL}?canceled=true`,
         automatic_tax: {enabled: true},
       });
   
