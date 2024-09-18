@@ -1,3 +1,3 @@
-# Unite
+# UniLex
 
 Collaborative language learning.
