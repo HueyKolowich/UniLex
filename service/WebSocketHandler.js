@@ -2,7 +2,8 @@ const { WebSocketServer } = require('ws');
 const uuid = require('uuid');
 const url = require('url');
 const fetch = require('node-fetch');
-const DB = require('./Database.js');
+const promptsModel = require('./models/prompts.js');
+const classroomsModel = require('./models/classrooms.js');
 const { sanitzeJSONResponseObjects } = require('./lib/SanitizeResponses.js');
 const OpenAI = require('openai');
 
@@ -62,7 +63,7 @@ function webSocketHandler(server) {
                             let { currentParticipantReceivingPrompts, promptIndex, finishedFirstParticipantsPrompts } = promptCounter;
 
                             try {
-                                let newPrompt = await DB.getPrompt(currentParticipantReceivingPrompts.classRoomId, promptIndex);
+                                let newPrompt = await generateNewPrompt(currentParticipantReceivingPrompts.classRoomId, promptIndex);
 
                                 if (newPrompt) {
                                     const promptHelps = await generatePromptHelps(newPrompt.prompt);
@@ -76,8 +77,8 @@ function webSocketHandler(server) {
                                     const otherConnection = Array.from(group).find(c => c.id !== currentParticipantReceivingPrompts.id);
 
                                     promptCounters.set(groupKey, { currentParticipantReceivingPrompts: otherConnection, promptIndex: 0, finishedFirstParticipantsPrompts: true });
-
-                                    newPrompt = await(DB.getPrompt(otherConnection.classRoomId, 0));
+                                    
+                                    newPrompt = await generateNewPrompt(otherConnection.classRoomId, 0);
 
                                     if (newPrompt) {
                                         const promptHelps = await generatePromptHelps(newPrompt.prompt);
@@ -208,6 +209,18 @@ async function generatePromptHelps(prompt) {
     helps = sanitzeJSONResponseObjects(helps);
 
     return helps;
+}
+
+async function generateNewPrompt(classRoomId, promptIndex) {
+    const capitalizeFirstLetter = (string) => (
+        string.charAt(0).toUpperCase() + string.slice(1)
+    )
+
+    let newPrompt = await promptsModel.getPrompt(classRoomId, promptIndex);
+    let target = (await classroomsModel.getClassInfo(classRoomId)).target;
+    newPrompt.language = target ? capitalizeFirstLetter(target) : "";
+
+    return newPrompt
 }
 
 function logGroups() {

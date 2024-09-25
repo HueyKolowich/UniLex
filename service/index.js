@@ -7,13 +7,22 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const DB = require('./Database.js');
-const { webSocketHandler } = require('./WebSocketHandler.js');
-const { sanitzeJSONResponseObjects } = require('./lib/SanitizeResponses.js');
 const OpenAI = require('openai');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const stripe = require('stripe')(process.env.STRIPE_API_SECRET_KEY);
+
+const classroomsModel = require('./models/classrooms.js');
+const eventsModel = require('./models/events.js');
+const meetingsConfigModel = require('./models/meetingsConfig.js');
+const paymentsModel = require('./models/payments.js');
+const promptsModel = require('./models/prompts.js');
+const studentRatingsModel = require('./models/studentRatings.js');
+const submissionsModel = require('./models/submissions.js');
+const userModel = require('./models/user.js');
+
+const { webSocketHandler } = require('./WebSocketHandler.js');
+const { sanitzeJSONResponseObjects } = require('./lib/SanitizeResponses.js');
 
 const app = express();
 const port = process.env.PORT;
@@ -55,12 +64,12 @@ app.get('/check-auth', (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-    const existingUser = await DB.getUser(req.body.username);
+    const existingUser = await userModel.getUser(req.body.username);
     if (existingUser) {
       return res.status(409).send({ msg: 'Username already in use' });
     }
 
-    const user = await DB.createUser(
+    const user = await userModel.createUser(
       req.body.username, 
       req.body.password, 
       req.body.role, 
@@ -74,8 +83,8 @@ app.post('/register', async (req, res) => {
       req.body.location
     );
 
-    await DB.addUserToClassroom(req.body.classRoomId, req.body.username, req.body.role);
-    const paymentRequired = await DB.checkPaymentRequirementForClassroom(req.body.classRoomId);
+    await classroomsModel.addUserToClassroom(req.body.classRoomId, req.body.username, req.body.role);
+    const paymentRequired = await classroomsModel.checkPaymentRequirementForClassroom(req.body.classRoomId);
 
     res.status(201).send({ msg: "Success", id: user._id, paymentRequired: paymentRequired });
   } catch (error) {
@@ -85,16 +94,16 @@ app.post('/register', async (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-  const user = await DB.getUser(req.body.username);
+  const user = await userModel.getUser(req.body.username);
   if (user) {
     if (await bcrypt.compare(req.body.password, user.password)) {
-      const paymentStatus = await DB.getPaymentStatus(req.body.username);
+      const paymentStatus = await paymentsModel.getPaymentStatus(req.body.username);
 
       if (paymentStatus !== 'paid') {
         return res.status(403).send({ msg: 'Payment required' });
       }
 
-      const newToken = await DB.generateNewSessionAuthToken(req.body.username);
+      const newToken = await userModel.generateNewSessionAuthToken(req.body.username);
 
       res.cookie(authCookieName, newToken, {
         httpOnly: true,
@@ -125,7 +134,7 @@ app.get('/getClassInfo', async (req, res) => {
   try {
       let classInfo;
       if (classRoomId) {
-        classInfo = await DB.getClassInfo(classRoomId);
+        classInfo = await classroomsModel.getClassInfo(classRoomId);
 
         res.status(200).json({ native: classInfo.native, target: classInfo.target, teacher: classInfo.teacher });
       } else {
@@ -155,7 +164,7 @@ app.post('/create-checkout-session', express.urlencoded({ extended: true }), asy
         automatic_tax: {enabled: true},
       });
   
-      if (DB.setCheckoutSession(username, session.id)) {
+      if (paymentsModel.setCheckoutSession(username, session.id)) {
         res.redirect(303, session.url);
       } else {
         res.status(500).json({ error: "The server was not able to being your payment process. Please contact us using the information found on our about page or try again" });
@@ -178,9 +187,9 @@ app.post('/payment-status', async (req, res) => {
     }
 
     if (noPaymentRequired) {
-      await DB.setPaymentStatus(username, 'paid');
+      await paymentsModel.setPaymentStatus(username, 'paid');
     } else {
-      const checkoutSession = await DB.getCheckoutSession(username);
+      const checkoutSession = await paymentsModel.getCheckoutSession(username);
 
       if (!checkoutSession) {
         return res.status(404).json({ error: 'Checkout session not found' });
@@ -192,7 +201,7 @@ app.post('/payment-status', async (req, res) => {
         return res.status(500).json({ error: 'Failed to retrieve session from Stripe' });
       }
 
-      await DB.setPaymentStatus(username, session.payment_status);
+      await paymentsModel.setPaymentStatus(username, session.payment_status);
     }
 
     res.status(200).json({ message: 'Payment status updated successfully' });
@@ -209,7 +218,7 @@ app.use(async (req, res, next) => {
       return res.status(401).json({ msg: 'Unauthorized: No token provided' });
     }
 
-    const user = await DB.getUserByToken(token);
+    const user = await userModel.getUserByToken(token);
     if (!user) {
       return res.status(401).json({ msg: 'Unauthorized: Invalid token' });
     }
@@ -244,7 +253,7 @@ app.get('/generate-video-token', (req, res) => {
 
 app.get('/current-meeting-scheduled', async (req, res) => {
   try {
-    const events = await DB.getBookedEvents(req.user.username);
+    const events = await eventsModel.getBookedEvents(req.user.username);
     const now = new Date();
 
     let currentEvent = null;
@@ -291,7 +300,7 @@ app.get('/class-assignment', async (req, res) => {
   }
 
   try {
-    const prompts = await DB.getAllPrompts(classRoomId);
+    const prompts = await promptsModel.getAllPrompts(classRoomId);
 
     if (!prompts || prompts.length === 0) {
       res.status(200).json({ prompts: [{ prompt: "No prompts have been assigned to this class", time: 0 }] });
@@ -332,7 +341,7 @@ app.get('/prompts', async (req, res) => {
 
 app.post('/prompts', async (req, res) => {
   try {
-    const classRoomId = await DB.getClassRoomIdByToken(req.cookies[authCookieName]);
+    const classRoomId = await userModel.getClassRoomIdByToken(req.cookies[authCookieName]);
     if (!classRoomId) {
       return res.status(400).json({ error: 'Invalid or missing authentication token' });
     }
@@ -345,7 +354,7 @@ app.post('/prompts', async (req, res) => {
     const classRoomIds = Array.isArray(classRoomId) ? classRoomId : [classRoomId];
 
     await Promise.all(classRoomIds.map(async (id) => {
-      await DB.addPrompts(id, promptsList);
+      await promptsModel.addPrompts(id, promptsList);
     }));
 
     res.status(200).json({ message: 'Prompts added successfully' });
@@ -357,7 +366,7 @@ app.post('/prompts', async (req, res) => {
 
 app.get('/events', async (req, res) => {
   try {
-    const events = await DB.getEvents(req.user.username, req.user.target);
+    const events = await eventsModel.getEvents(req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error getting events:", error);
@@ -369,9 +378,9 @@ app.delete('/events', async (req, res) => {
   const { calEventId } = req.body;
 
   try {
-    await DB.deleteEvent(calEventId);
+    await eventsModel.deleteEvent(calEventId);
 
-    const events = await DB.getEvents(req.user.username, req.user.target);
+    const events = await eventsModel.getEvents(req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error deleting event:", error);
@@ -383,7 +392,7 @@ app.post('/events', async (req, res) => {
   const { start, end } = req.body;
 
   try {
-    await DB.addEvent(req.user.username, req.user.firstname, req.user.location, start, end, req.user.native, req.user.target);
+    await eventsModel.addEvent(req.user.username, req.user.firstname, req.user.location, start, end, req.user.native, req.user.target);
     res.status(201).json({ message: 'Event added successfully', title: req.user.firstname, details: req.user.location });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred while adding the event' });
@@ -394,9 +403,9 @@ app.post('/events-status', async (req, res) => {
   const { calEventId } = req.body;
 
   try {
-    await DB.changeEventStatus(calEventId, req.user.username, req.user.firstname);
+    await eventsModel.changeEventStatus(calEventId, req.user.username, req.user.firstname);
 
-    const events = await DB.getEvents(req.user.username, req.user.target);
+    const events = await eventsModel.getEvents(req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error changing status of event:", error);
@@ -408,9 +417,9 @@ app.delete('/events-status', async (req, res) => {
   const { calEventId } = req.body;
 
   try {
-    await DB.removeNameFromEventParticipantList(calEventId);
+    await eventsModel.removeNameFromEventParticipantList(calEventId);
 
-    const events = await DB.getEvents(req.user.username, req.user.target);
+    const events = await eventsModel.getEvents(req.user.username, req.user.target);
     res.status(200).json({ events: events });
   } catch (error) {
     console.error("Error changing status of event:", error);
@@ -420,7 +429,7 @@ app.delete('/events-status', async (req, res) => {
 
 app.get('/meetingcount', async (req, res) => {
   try {
-    const result = await DB.getDesiredMeetingsCountForUser(req.user.username);
+    const result = await meetingsConfigModel.getDesiredMeetingsCountForUser(req.user.username);
 
     res.status(200).json({ count: result });
   } catch (error) {
@@ -433,7 +442,7 @@ app.post('/meetingcount', async (req, res) => {
   const { meetingsCount } = req.body;
 
   try {
-    await DB.setDesiredMeetingsCountForUser(req.user.username, meetingsCount);
+    await meetingsConfigModel.setDesiredMeetingsCountForUser(req.user.username, meetingsCount);
 
     res.status(200).json({ msg: "Success" });
   } catch (error) {
@@ -448,7 +457,7 @@ app.get('/submissions', async (req, res) => {
   try {
       let submissions = [];
       if (username) {
-        submissions = await DB.getStudentSubmissions(username);
+        submissions = await submissionsModel.getStudentSubmissions(username);
 
         res.status(200).json({ submissions: submissions });
       } else {
@@ -464,7 +473,7 @@ app.post('/submissions', async (req, res) => {
   const { difficultiesSubmission, improvementSubmission, cultureSubmission, otherStudentRating, otherStudentUsername, comfortableRating } = req.body;
 
   try {
-    await DB.setStudentSubmission(
+    await submissionsModel.setStudentSubmission(
       req.user.username, 
       req.user.classRoomId, 
       new Date(), 
@@ -474,7 +483,7 @@ app.post('/submissions', async (req, res) => {
       comfortableRating
     );
 
-    await DB.setRatingForOtherStudent(otherStudentUsername, otherStudentRating);
+    await studentRatingsModel.setRatingForOtherStudent(otherStudentUsername, otherStudentRating);
 
     res.status(200).json({ msg: "Success" });
   } catch (error) {
@@ -488,10 +497,10 @@ app.get('/student-list', async (req, res) => {
 
   try {
     if (classRoomId) {
-      const studentUsernameList = await DB.getStudentUsernamesByClassRoomId(classRoomId);
+      const studentUsernameList = await classroomsModel.getStudentUsernamesByClassRoomId(classRoomId);
 
       const studentListPromises = studentUsernameList.map(async (username) => {
-        const student = await DB.getUser(username);
+        const student = await userModel.getUser(username);
         if (student) {
           return { username: student.username, firstname: student.firstname, lastname: student.lastname };
         }
@@ -517,8 +526,8 @@ app.get('/student-table-info', async (req, res) => {
   try {
       let rating, recent, score;
       if (username) {
-        ({ rating, recent } = await DB.getLatestMeetingDateAndRating(username));
-        score = await DB.getAverageHelpfulnessScore(username);
+        ({ rating, recent } = await submissionsModel.getLatestMeetingDateAndRating(username));
+        score = await studentRatingsModel.getAverageHelpfulnessScore(username);
 
         res.status(200).json({ rating: rating, recent: recent, score: score });
       } else {
@@ -536,11 +545,11 @@ app.get('/classroom-name', async (req, res) => {
 
   try {
     if (classRoomId) {
-      const classInfo = await DB.getClassInfo(classRoomId);
+      const classInfo = await classroomsModel.getClassInfo(classRoomId);
 
       res.status(200).json({ name: classInfo.name });
     } else if (allClasses) {
-      const classes = await DB.getClasses(req.user.username);
+      const classes = await classroomsModel.getClasses(req.user.username);
 
       res.status(200).json({ classes: classes });
     } else {
