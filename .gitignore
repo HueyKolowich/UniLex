@@ -20,7 +20,7 @@
 .env.test.local
 .env.production.local
 /service/.env
-/service/dbConfig.json
+/service/models/mongo/dbConfig.json
 deployReact.sh
 
 npm-debug.log*
