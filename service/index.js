@@ -549,7 +549,12 @@ app.get('/classroom-name', async (req, res) => {
 
       res.status(200).json({ name: classInfo.name });
     } else if (allClasses) {
-      const classes = await classroomsModel.getClasses(req.user.username);
+      let names = await userModel.getClassRoomIdByToken(req.cookies[authCookieName]);
+      if (!Array.isArray(names)) {
+        names = [names];
+      }
+
+      const classes = await classroomsModel.getClasses(names);
 
       res.status(200).json({ classes: classes });
     } else {

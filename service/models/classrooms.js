@@ -102,15 +102,18 @@ async function getClassInfo(classRoomId) {
     }
 }
 
-async function getClasses(username) {
+async function getClasses(classRoomIdList) {
     try {
-        const filter = { teacher: username };
-    
-        const classes = await classroomsCollection.find(filter).toArray();
+        const classes = await Promise.all(classRoomIdList.map(async (classRoomId) => {
+            const filter = { classRoomId: classRoomId };
+            const classroom = await classroomsCollection.findOne(filter);
+
+            return classroom;
+        }));
     
         return classes;
     } catch (error) {
-        console.error("Error setting getting info for all classrooms:", error);
+        console.error("Error getting info for all classrooms:", error);
         throw error;
     }
 }

@@ -253,27 +253,32 @@ function Table({ classRoomId, bringBackToLogin, setSelectedStudent, setModalOpen
                 }
     
                 const studentListData = await response.json();
-    
-                const studentList = await Promise.all(
-                    studentListData.studentList.map(async (student) => {
-                        const studentInfoResponse = await fetch(`/student-table-info?username=${student.username}`);
-                        const studentInfoData = await studentInfoResponse.json();
 
-                        const formatValue = (value) => value === "NA" ? "" : value.toFixed(1);
+                if (studentListData.studentList) {
+                    const studentList = await Promise.all(
+                        studentListData.studentList.map(async (student) => {
+                            const studentInfoResponse = await fetch(`/student-table-info?username=${student.username}`);
+                            const studentInfoData = await studentInfoResponse.json();
     
-                        return {
-                            username: student.username,
-                            firstname: student.firstname,
-                            lastname: student.lastname,
-                            rating: formatValue(studentInfoData.rating),
-                            recent: studentInfoData.recent,
-                            score: formatValue(studentInfoData.score),
-                        };
-                    })
-                );
-    
-                setStudentList(studentList);
-                calculateStats(studentList);
+                            const formatValue = (value) => value === "NA" ? "" : value.toFixed(1);
+        
+                            return {
+                                username: student.username,
+                                firstname: student.firstname,
+                                lastname: student.lastname,
+                                rating: formatValue(studentInfoData.rating),
+                                recent: studentInfoData.recent,
+                                score: formatValue(studentInfoData.score),
+                            };
+                        })
+                    );
+        
+                    setStudentList(studentList);
+                    calculateStats(studentList);
+                } else {
+                    setStudentList([]);
+                    calculateStats([]);
+                }
             } catch (error) {
                 console.error("Error fetching the student list:", error);
             }
