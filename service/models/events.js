@@ -90,7 +90,13 @@ async function changeEventStatus(calEventId, username, firstname) {
         }
       };
   
-      await eventsCollection.findOneAndUpdate(filter, update);
+      const updatedEvent = await eventsCollection.findOneAndUpdate(
+        filter,
+        update,
+        { returnDocument: "after" }
+      );
+  
+      return updatedEvent;
     } catch (error) {
       console.error("Error changing status of event:", error);
       throw error;

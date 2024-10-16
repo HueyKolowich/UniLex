@@ -23,11 +23,14 @@ const userModel = require('./models/user.js');
 
 const { webSocketHandler } = require('./WebSocketHandler.js');
 const { sanitzeJSONResponseObjects } = require('./lib/SanitizeResponses.js');
+const { ContactService } = require('./services/contact-service.js');
 
 const app = express();
 const port = process.env.PORT;
 
 const openai = new OpenAI();
+
+const contactService = new ContactService();
 
 const authCookieName = 'authToken';
 
@@ -402,8 +405,56 @@ app.post('/events', async (req, res) => {
 app.post('/events-status', async (req, res) => {
   const { calEventId } = req.body;
 
+  const formatGMTDate = (GMTDateString) => {
+    if (!GMTDateString || GMTDateString === "NA") {
+      return { date: "", time: "" };
+    }
+
+    const date = new Date(GMTDateString);
+
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const formattedHours = String(hours).padStart(2, '0');
+
+    return { date: `${month}/${day}/${year}`, time: `${formattedHours}:${minutes} ${ampm}` };
+  };
+
+  const capitalizeFirstLetter = (string) => (
+    string.charAt(0).toUpperCase() + string.slice(1)
+  );
+
   try {
-    await eventsModel.changeEventStatus(calEventId, req.user.username, req.user.firstname);
+    const event = await eventsModel.changeEventStatus(calEventId, req.user.username, req.user.firstname);
+    const otherParticipant = await userModel.getUser(event.username);
+
+    if (!isDev) {
+      const subject = "Someone has scheduled a conversation with you!";
+      const body = `
+        Hi ${otherParticipant.firstname},
+
+        ${req.user.firstname} has scheduled one of your conversations with you through UniLex! 
+
+        When: ${formatGMTDate(event.start).date} at ${formatGMTDate(event.start).time}
+
+        You will spend half of the time helping ${req.user.firstname} with their ${capitalizeFirstLetter(req.user.target)},
+        and the other half of the conversation will be ${req.user.firstname} helping you with your ${capitalizeFirstLetter(otherParticipant.target)}!
+
+        Please make sure to prepare for the conversation and reach out if you need any assistance.
+
+        Best regards,
+        The UniLex Team
+      `;
+      
+      contactService.sendEmail(req.user.email, subject, body);
+    }
 
     const events = await eventsModel.getEvents(req.user.username, req.user.target);
     res.status(200).json({ events: events });
