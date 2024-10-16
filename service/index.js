@@ -442,7 +442,7 @@ app.post('/events-status', async (req, res) => {
 
         ${req.user.firstname} has scheduled one of your conversations with you through UniLex! 
 
-        When: ${formatGMTDate(event.start).date} at ${formatGMTDate(event.start).time}
+        When: ${formatGMTDate(event.start).date}
 
         You will spend half of the time helping ${req.user.firstname} with their ${capitalizeFirstLetter(req.user.target)},
         and the other half of the conversation will be ${req.user.firstname} helping you with your ${capitalizeFirstLetter(otherParticipant.target)}!
