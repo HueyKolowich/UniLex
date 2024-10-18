@@ -453,7 +453,7 @@ app.post('/events-status', async (req, res) => {
         The UniLex Team
       `;
       
-      contactService.sendEmail(req.user.email, subject, body);
+      contactService.sendEmail(otherParticipant.username, subject, body);
     }
 
     const events = await eventsModel.getEvents(req.user.username, req.user.target);
