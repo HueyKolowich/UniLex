@@ -145,6 +145,25 @@ html, body {
         color: white;
     }
 }
+.password-wrapper {
+    position: relative;
+    display: flex;
+  i {
+    position: absolute;
+    color: #bbbbbb !important
+  }
+  i:hover {
+    color: #000000 !important;
+  }
+}
+
+.role-select {
+    appearance: none !important;
+    color: #bbbbbb !important;
+}
+.role-select:not(:invalid) {
+    color: #000000 !important;
+}
 
 /* Navigation */
 .navigation-item {

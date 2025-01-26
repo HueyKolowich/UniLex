@@ -126,6 +126,42 @@ app.post('/login', async (req, res) => {
   res.status(401).send({ msg: 'Unauthorized' });
 });
 
+app.post('/password-reset-request', async (req, res) => {
+  const user = await userModel.getUserByEmail(req.body.email);
+
+  if (user === null) {
+    res.status(404).send({ msg: 'No user by this email in database'} );
+  } else {
+    const resetToken = await userModel.generatePasswordResetToken(user.username);
+
+    const resetLink = `${isDev ? 'http://localhost:3000' : 'https://unilexlanguage.com'}/?resetToken=${resetToken}&email=${user.email}`;
+
+    contactService.sendEmail(user.email, 'Password reset instructions',
+      `Please click the following link to reset your password.
+      
+      ${resetLink}
+      `
+    );
+
+    res.status(200).send({ msg: 'Success' });
+  }
+});
+
+app.post('/password-reset', async (req, res) => {
+  const user = await userModel.getUserByEmail(req.body.email);
+
+  if (user === null) {
+    res.status(404).send({ msg: 'No user by this email in database'} );
+  } else {
+    if (user.resetToken !== req.body.resetToken || user.resetTokenExpiration < new Date()) {
+      res.status(401).send({ msg: 'Unauthorized' });
+    } else {
+      await userModel.updatePassword(user.username, req.body.password);
+      res.status(200).send({ msg: 'Success' });
+    }
+  }
+});
+
 app.get('/logout', (req, res) => {
   res.clearCookie(authCookieName);
   res.end();

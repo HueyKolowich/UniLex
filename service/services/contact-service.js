@@ -10,7 +10,8 @@ class ContactService {
             "From": "contact@unilexlanguage.com",
             "To": toAddress,
             "Subject": subject,
-            "TextBody": body
+            "TextBody": body,
+            "MessageStream": "outbound"
         });
     }
 }
