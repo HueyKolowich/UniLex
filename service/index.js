@@ -655,12 +655,17 @@ app.post('/events-status', async (req, res) => {
 });
 
 app.delete('/events-status', async (req, res) => {
-    const { calEventId, otherParticipantUsername } = req.body; // I could just ask also for the username of the other participant here?
+    const { calEventId, otherParticipantUsername } = req.body;
 
     try {
-        // Here I now need the firstname of the other participant
+        const otherParticipant = await userModel.getUser(
+            otherParticipantUsername
+        );
 
-        await eventsModel.removeNameFromEventParticipantList(calEventId, null); // And then pass it in as a parameter here
+        await eventsModel.removeNameFromEventParticipantList(
+            calEventId,
+            otherParticipant.firstname
+        );
 
         const events = await eventsModel.getEvents(
             req.user.username,

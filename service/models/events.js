@@ -136,8 +136,6 @@ async function removeNameFromEventParticipantList(
             _id: new ObjectId(calEventId),
         };
 
-        const event = await eventsCollection.findOne(filter);
-
         const update = {
             $set: {
                 title: otherParticipantFirstname,
