@@ -518,7 +518,8 @@ app.get('/events', async (req, res) => {
     try {
         const events = await eventsModel.getEvents(
             req.user.username,
-            req.user.target
+            req.user.target,
+            req.user.native
         );
         res.status(200).json({ events: events });
     } catch (error) {
@@ -537,7 +538,8 @@ app.delete('/events', async (req, res) => {
 
         const events = await eventsModel.getEvents(
             req.user.username,
-            req.user.target
+            req.user.target,
+            req.user.native
         );
         res.status(200).json({ events: events });
     } catch (error) {
@@ -643,7 +645,8 @@ app.post('/events-status', async (req, res) => {
 
         const events = await eventsModel.getEvents(
             req.user.username,
-            req.user.target
+            req.user.target,
+            req.user.native
         );
         res.status(200).json({ events: events });
     } catch (error) {
@@ -669,7 +672,8 @@ app.delete('/events-status', async (req, res) => {
 
         const events = await eventsModel.getEvents(
             req.user.username,
-            req.user.target
+            req.user.target,
+            req.user.native
         );
         res.status(200).json({ events: events });
     } catch (error) {

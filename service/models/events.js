@@ -3,13 +3,18 @@ const { db } = require('./mongo/mongoClient');
 
 const eventsCollection = db.collection('events');
 
-async function getEvents(username, target) {
+async function getEvents(username, target, native) {
     try {
         const result = await eventsCollection
             .find({
                 $and: [
                     {
-                        $or: [{ username: username }, { native: target }],
+                        $or: [
+                            { username: username },
+                            {
+                                $and: [{ native: target }, { target: native }],
+                            },
+                        ],
                     },
                     {
                         $or: [
